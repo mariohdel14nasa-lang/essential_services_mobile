@@ -19,11 +19,11 @@ kotlin {
 }
 
 android {
-    namespace = "com.sameerasw.medrop"
+    namespace = "com.essential.services"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.sameerasw.medrop"
+        applicationId = "com.essential.services"
         minSdk = 26
         targetSdk = 37
         versionCode = 4

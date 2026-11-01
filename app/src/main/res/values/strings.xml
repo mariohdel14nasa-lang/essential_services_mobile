@@ -1,12 +1,12 @@
 <resources>
-    <string name="app_name">MeDrop</string>
-    <string name="feat_medrop_title">MeDrop</string>
+    <string name="app_name">Essential Services</string>
+    <string name="feat_medrop_title">Essential Services</string>
     <string name="feat_medrop_set_up">Set Up</string>
     <string name="feat_medrop_select_contact">Select Contact</string>
     <string name="feat_medrop_pick_contact">Pick a contact</string>
     <string name="feat_medrop_change_contact">Change Contact</string>
     <string name="feat_medrop_allow_when_locked">Allow when Locked</string>
-    <string name="feat_medrop_allow_when_locked_desc">Open MeDrop from the quick tile even when the screen is locked</string>
+    <string name="feat_medrop_allow_when_locked_desc">Open Essential Services from the quick tile even when the screen is locked</string>
     <string name="feat_medrop_show_ripple">Show ripple</string>
     <string name="feat_medrop_tap_to_share">Tap to share</string>
     <string name="feat_medrop_no_contact">No contact selected</string>
@@ -33,11 +33,11 @@
     <string name="feat_medrop_broadcasting">Broadcasting contact via NFC…</string>
     <string name="feat_medrop_nfc_unavailable">NFC is not available on this device</string>
     <string name="feat_medrop_nfc_disabled">NFC is disabled. Enable it in Settings to share.</string>
-    <string name="feat_medrop_profile_contact">Contact</string>
-    <string name="feat_medrop_profile_professional">Professional</string>
-    <string name="feat_medrop_profile_professional_desc">For your business needs</string>
-    <string name="feat_medrop_profile_custom">Custom</string>
-    <string name="feat_medrop_profile_custom_desc">Customizable profile while sharing</string>
+    <string name="feat_medrop_profile_contact">Home</string>
+    <string name="feat_medrop_profile_professional">proffesional</string>
+    <string name="feat_medrop_profile_professional_desc">Share your contact with anyone!</string>
+    <string name="feat_medrop_profile_custom">Apps</string>
+    <string name="feat_medrop_profile_custom_desc">All Essential Apps</string>
     <string name="feat_medrop_use_photo_for_all">Same profile picture</string>
     <string name="feat_medrop_use_photo_for_all_desc">Use the contact photo across all profiles</string>
     <string name="feat_medrop_section_contact_source">Contact Source</string>
@@ -58,7 +58,7 @@
     <string name="feat_medrop_action_save">Save</string>
     <string name="feat_medrop_action_cancel">Cancel</string>
     <string name="feat_medrop_action_reset_default">Reset to default</string>
-    <string name="about_desc_medrop">Share your contact card with another device using NFC — similar to Apple\'s NameDrop. Your phone acts as a virtual NFC card that any NFC-enabled device can read.</string>
+    <string name="about_desc_medrop">Share your contact card with another device using NFC. Your phone acts as a virtual NFC card that any NFC-enabled device can read.</string>
 
     <string name="content_desc_back">Back</string>
     <string name="action_help_guide">Help Guide</string>
@@ -75,7 +75,7 @@
     <string name="help_section_setup_title">Setting Up Your Card</string>
     <string name="help_section_setup_desc">Select your own contact card from Google Contacts to populate your information. You can customize fields and edit what is shown across Contact, Professional, and Custom profiles.</string>
     
-    <string name="help_section_nfc_title">NFC Sharing (MeDrop)</string>
+    <string name="help_section_nfc_title">NFC Sharing (Essential Services)</string>
     <string name="help_section_nfc_desc">Turn on NFC in your system settings. Hold your device near another NFC-enabled Android or iOS device. When detected, the other phone will receive your virtual vCard contact details instantly.</string>
 
     <string name="help_section_lockscreen_title">Lockscreen Access</string>
@@ -93,7 +93,7 @@
     <string name="label_use_blur">Use blur</string>
     <string name="desc_use_blur">Enable progressive blur elements across the UI</string>
     <string name="about_title">About</string>
-    <string name="about_app_desc">MeDrop allows seamless sharing of your contact card and profiles using NFC Host Card Emulation.</string>
+    <string name="about_app_desc">Essential Services allows seamless sharing of your contact card and profiles using NFC Host Card Emulation.</string>
 
     <string name="requires_following_permissions">%1$s requires following permissions</string>
     <string name="perm_contacts_title">Contacts Access</string>
@@ -102,21 +102,21 @@
     <string name="perm_action_granted">Granted</string>
     <string name="perm_required_for">Required for:</string>
 
-    <string name="app_developer_name">sameerasw.com</string>
-    <string name="app_description">Share your contact card with anyone.</string>
-    <string name="developed_by_format">Developed by %1$s\nwith ❤\uFE0F from \uD83C\uDDF1\uD83C\uDDF0</string>
-    <string name="action_website">Website</string>
-    <string name="action_view_on_github">View on GitHub</string>
-    <string name="action_contact">Contact</string>
-    <string name="action_telegram">Telegram</string>
-    <string name="action_support">Support</string>
+    <string name="app_developer_name">mariohdel14nasa-lang</string>
+    <string name="app_description">A service app for other apps.</string>
+    <string name="developed_by_format">Developed by mariohdel14nasa-lang with ❤\uFE0F from 🇪🇸</string>
+    <string name="action_website">Website of the original creator</string>
+    <string name="action_view_on_github">View the original project on GitHub</string>
+    <string name="action_contact">Contact the original creator</string>
+    <string name="action_telegram">Telegram Comunnity of sameerasw</string>
+    <string name="action_support">Support sameerasw</string>
     <string name="action_privacy_policy">Privacy Policy</string>
     <string name="label_other_apps">Other Apps</string>
-    <string name="app_essentials">Essentials</string>
-    <string name="app_airsync">AirSync</string>
-    <string name="app_zenzero">ZenZero</string>
-    <string name="app_canvas">Canvas</string>
-    <string name="app_tasks">Tasks</string>
+    <string name="app_essentials">I</string>
+    <string name="app_airsync">do</string>
+    <string name="app_zenzero">not</string>
+    <string name="app_canvas">have</string>
+    <string name="app_tasks">any</string>
     <string name="send_email_chooser_title">Send email</string>
     <string name="error_no_email_app">No email app available</string>
     <string name="settings_section_developer_options">Developer options</string>
@@ -132,7 +132,16 @@
     <string name="feat_medrop_iphone_support_desc">Using secondary URI record showing contact info on web</string>
     <string name="feat_medrop_share_as_vcard">Share as vCard</string>
     <string name="feat_medrop_share_as_vcard_desc">Supported by Android</string>
+    <string name="setting_deeplink_sharing_title">Share Essential Account Data with other apps</string>
+    <string name="setting_deeplink_sharing_desc">Allow other apps to access your Essential Account data via URIs and Deep Links</string>
     <string name="feat_medrop_add_tile_title">Quick Settings Tile</string>
-    <string name="feat_medrop_add_tile_desc">Add the MeDrop tile to your Quick Settings panel for one-tap sharing</string>
+    <string name="feat_medrop_add_tile_desc">Add the Essential Services tile to your Quick Settings panel for one-tap sharing</string>
     <string name="feat_medrop_tile_added">Added to Quick Settings</string>
+
+    <!-- Credits Section -->
+    <string name="settings_section_credits">  </string>
+    <string name="credits_item_1_title">mariohdel14nasa-lang</string>
+    <string name="credits_item_1_desc">Developer and Maintainer of Essential Services</string>
+    <string name="credits_item_2_title">sameerasw</string>
+    <string name="credits_item_2_desc">Original creator of MeDrop and Essentials UI</string>
 </resources>

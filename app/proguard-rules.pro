@@ -20,12 +20,12 @@
 
 # Kotlin Reflect & Domain Models
 -keep class kotlin.reflect.** { *; }
--keep class com.sameerasw.medrop.domain.model.** { *; }
--keep class com.sameerasw.medrop.data.model.** { *; }
--keepclassmembers class com.sameerasw.medrop.data.model.** { *; }
--keep class com.sameerasw.medrop.data.repository.** { *; }
--keep class com.sameerasw.medrop.services.MeDropWearSyncManager** { *; }
--keepclassmembers class com.sameerasw.medrop.services.MeDropWearSyncManager** { *; }
+-keep class com.essential.services.domain.model.** { *; }
+-keep class com.essential.services.data.model.** { *; }
+-keepclassmembers class com.essential.services.data.model.** { *; }
+-keep class com.essential.services.data.repository.** { *; }
+-keep class com.essential.services.services.MeDropWearSyncManager** { *; }
+-keepclassmembers class com.essential.services.services.MeDropWearSyncManager** { *; }
 
 # Keep ViewModel constructors for reflection-based instantiation
 -keepclassmembers class * extends androidx.lifecycle.ViewModel {
@@ -38,7 +38,7 @@
 }
 
 # Keep R.string class and fields for runtime reflection lookup
--keep class com.sameerasw.medrop.R$string { *; }
--keepclassmembers class com.sameerasw.medrop.R$string {
+-keep class com.essential.services.R$string { *; }
+-keepclassmembers class com.essential.services.R$string {
     public static <fields>;
 }
