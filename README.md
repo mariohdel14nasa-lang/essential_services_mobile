@@ -15,6 +15,7 @@ A brand-new way to get user info, such as:
 # Credits To...
 - Sameerasw (App base & Draft)
 - Ivorisnoob (Koda)
+- shrimqy (sefirah)
 - FossifyOrg (Calculator)
 - Gemini (I don't know how to code)
 
