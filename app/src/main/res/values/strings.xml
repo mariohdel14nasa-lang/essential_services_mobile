@@ -139,7 +139,7 @@
     <string name="feat_medrop_tile_added">Added to Quick Settings</string>
 
     <!-- Credits Section -->
-    <string name="settings_section_credits">  </string>
+    <string name="settings_section_credits">Credis To...</string>
     <string name="credits_item_1_title">mariohdel14nasa-lang</string>
     <string name="credits_item_1_desc">Developer and Maintainer of Essential Services</string>
     <string name="credits_item_2_title">sameerasw</string>

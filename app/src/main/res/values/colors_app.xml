@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Light theme window background -->
-    <color name="app_window_background">#FFFFFFFF</color>
-    <color name="branding_icon_background">#FF6650a4</color>
-    <color name="splash_background">#161D1A</color>
+    <color name="app_window_background">#B8CEDB</color>
+    <color name="branding_icon_background">#402B7A</color>
+    <color name="splash_background">#488066</color>
 </resources>
 
