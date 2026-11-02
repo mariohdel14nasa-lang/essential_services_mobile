@@ -7,7 +7,7 @@ A brand-new way to get user info, such as:
 - eMail
 - Phone number
 - Passwords
-  And more (Coming soon)
+- And more (Coming soon)
 
 # How to develop
 - Check out DEVELOP.md
