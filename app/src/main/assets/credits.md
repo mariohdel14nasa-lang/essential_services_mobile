@@ -2,3 +2,4 @@
 - **sameerasw**: Original creator of MeDrop (the original project,https://github.com/sameerasw/MeDrop) and Draft (https://github.com/sameerasw/Draft)
 - **ivorisnoob**: Creator of Koda (https://github.com/Ivorisnoob/Koda)
 - **FossifyOrg**: Creators of the Fossify Apps Suite: https://github.com/FossifyOrg/Calculator
+- **shrimqy**: Creator of Sefirah: https://github.com/shrimqy/Sefirah-Android
