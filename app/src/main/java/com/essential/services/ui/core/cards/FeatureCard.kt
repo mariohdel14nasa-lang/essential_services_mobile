@@ -1,13 +1,8 @@
 package com.essential.services.ui.core.cards
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
@@ -37,15 +32,21 @@ fun FeatureCard(
     iconRes: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    containerColor: Color? = null,
+    accentColor: Color? = null,
 ) {
     val view = LocalView.current
+    val effectiveContainerColor = containerColor ?: MaterialTheme.colorScheme.surfaceBright
+    val effectiveIconBg = accentColor ?: ColorUtil.getPastelColorFor(title)
+    val effectiveIconTint = if (containerColor != null) Color.White else ColorUtil.getVibrantColorFor(title)
+    val effectiveTextColor = if (containerColor != null) Color.White else MaterialTheme.colorScheme.onSurface
 
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
         colors =
             CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceBright,
+                containerColor = effectiveContainerColor,
             ),
     ) {
         ListItem(
@@ -58,6 +59,8 @@ fun FeatureCard(
             colors =
                 ListItemDefaults.colors(
                     containerColor = Color.Transparent,
+                    headlineColor = effectiveTextColor,
+                    supportingColor = if (containerColor != null) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
                 ),
             leadingContent = {
                 Box(
@@ -65,7 +68,7 @@ fun FeatureCard(
                         Modifier
                             .size(48.dp)
                             .background(
-                                color = ColorUtil.getPastelColorFor(title),
+                                color = effectiveIconBg,
                                 shape = CircleShape,
                             ),
                     contentAlignment = Alignment.Center,
@@ -74,7 +77,7 @@ fun FeatureCard(
                         painter = painterResource(id = iconRes),
                         contentDescription = title,
                         modifier = Modifier.size(24.dp),
-                        tint = ColorUtil.getVibrantColorFor(title),
+                        tint = effectiveIconTint,
                     )
                 }
             },
@@ -84,7 +87,7 @@ fun FeatureCard(
                         Text(
                             text = description,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = if (containerColor != null) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 } else {
@@ -95,6 +98,7 @@ fun FeatureCard(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
+                    color = effectiveTextColor,
                 )
             },
         )

@@ -230,8 +230,10 @@ class SettingsActivity : ComponentActivity() {
 
                             FeatureCard(
                                 title = stringResource(R.string.setting_download_web_button_text),
-                                description = stringResource(R.string.setting_download_web_button_desc),
-                                iconRes = R.drawable.rounded_globe_24,
+                                description = null,
+                                iconRes = R.drawable.ic_download_new,
+                                containerColor = androidx.compose.ui.graphics.Color(0xFF1A73E8),
+                                accentColor = androidx.compose.ui.graphics.Color(0xFF1557B0),
                                 onClick = {
                                     val webUrl = context.getString(R.string.setting_download_web_url)
                                     if (webUrl.endsWith(".apk", ignoreCase = true)) {
