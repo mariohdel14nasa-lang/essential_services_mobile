@@ -228,6 +228,68 @@ class SettingsActivity : ComponentActivity() {
                                 }
                             }
 
+                            FeatureCard(
+                                title = stringResource(R.string.setting_download_web_button_text),
+                                description = stringResource(R.string.setting_download_web_button_desc),
+                                iconRes = R.drawable.rounded_globe_24,
+                                onClick = {
+                                    val webUrl = context.getString(R.string.setting_download_web_url)
+                                    if (webUrl.endsWith(".apk", ignoreCase = true)) {
+                                        com.essential.services.utils.ApkInstaller.downloadAndInstallApk(context, webUrl)
+                                    } else {
+                                        android.widget.Toast.makeText(context, "Checking for updates...", android.widget.Toast.LENGTH_SHORT).show()
+                                        @android.annotation.SuppressLint("SetJavaScriptEnabled")
+                                        android.webkit.WebView(context).apply {
+                                            this.settings.javaScriptEnabled = true
+                                            this.settings.domStorageEnabled = true
+
+                                            setDownloadListener { downloadUrl, _, _, mimetype, _ ->
+                                                if (downloadUrl.endsWith(".apk", ignoreCase = true) || mimetype == "application/vnd.android.package-archive") {
+                                                    com.essential.services.utils.ApkInstaller.downloadAndInstallApk(context, downloadUrl)
+                                                }
+                                            }
+
+                                            webViewClient = object : android.webkit.WebViewClient() {
+                                                private var isHandled = false
+
+                                                override fun shouldOverrideUrlLoading(view: android.webkit.WebView?, request: android.webkit.WebResourceRequest?): Boolean {
+                                                    val requestUrl = request?.url?.toString() ?: ""
+                                                    if (requestUrl.endsWith(".apk", ignoreCase = true)) {
+                                                        com.essential.services.utils.ApkInstaller.downloadAndInstallApk(context, requestUrl)
+                                                        return true
+                                                    }
+                                                    return super.shouldOverrideUrlLoading(view, request)
+                                                }
+
+                                                override fun onPageFinished(view: android.webkit.WebView?, loadedUrl: String?) {
+                                                    super.onPageFinished(view, loadedUrl)
+                                                    if (!isHandled) {
+                                                        isHandled = true
+                                                        view?.evaluateJavascript("(function() { return JSON.stringify(localStorage); })();") { result ->
+                                                            if (!result.isNullOrEmpty() && result != "null") {
+                                                                val cleanJson = if (result.startsWith("\"") && result.endsWith("\"")) {
+                                                                    try {
+                                                                        com.google.gson.Gson().fromJson(result, String::class.java)
+                                                                    } catch (_: Exception) { result }
+                                                                } else result
+                                                                com.essential.services.data.repository.MeDropRepository(context).saveWebViewLocalStorage(cleanJson)
+                                                            }
+                                                            viewModel.setMeDropActiveProfile(context, com.essential.services.domain.model.MeDropProfileType.CONTACT)
+                                                            val intent = Intent(context, com.essential.services.MainActivity::class.java).apply {
+                                                                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                                                            }
+                                                            context.startActivity(intent)
+                                                            (context as? Activity)?.finish()
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            loadUrl(webUrl)
+                                        }
+                                    }
+                                },
+                            )
+
                             Text(
                                 text = stringResource(R.string.settings_section_appearance),
                                 style = MaterialTheme.typography.labelLarge,

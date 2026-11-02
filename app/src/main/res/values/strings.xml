@@ -72,17 +72,17 @@
     <string name="email_label">Email</string>
     <string name="instruction_step_image_description">Step %1$d Image</string>
 
-    <string name="help_section_setup_title">Setting Up Your Card</string>
-    <string name="help_section_setup_desc">Select your own contact card from Google Contacts to populate your information. You can customize fields and edit what is shown across Contact, Professional, and Custom profiles.</string>
+    <string name="help_section_setup_title">Setting Up Your Account</string>
+    <string name="help_section_setup_desc">You can create your own Essential Account and sync it to all of your devices. You can also introduce your personal info, _optionally_.</string>
     
-    <string name="help_section_nfc_title">NFC Sharing (Essential Services)</string>
-    <string name="help_section_nfc_desc">Turn on NFC in your system settings. Hold your device near another NFC-enabled Android or iOS device. When detected, the other phone will receive your virtual vCard contact details instantly.</string>
+    <string name="help_section_nfc_title">Syncing your account to your devices</string>
+    <string name="help_section_nfc_desc">You can also sync your Essential Account just like any other account system on the planet. You can sync by tapping Home > Sync and interchanging pairing codes.</string>
 
-    <string name="help_section_lockscreen_title">Lockscreen Access</string>
-    <string name="help_section_lockscreen_desc">Enable \"Allow when Locked\" in Settings to allow launching your contact card sheet directly from the Quick Settings Tile over the keyguard without unlocking your device.</string>
+    <string name="help_section_lockscreen_title">Share account data</string>
+    <string name="help_section_lockscreen_desc">You can enable or other apps to access all your account data, making it easier to sign in into any supported app.</string>
 
-    <string name="help_section_profiles_title">Multiple Profiles</string>
-    <string name="help_section_profiles_desc">Manage different digital identity cards: use the Personal Contact profile for friends, Professional for networking and work colleagues, and Custom for tailored events.</string>
+    <string name="help_section_profiles_title">Recommended apps</string>
+    <string name="help_section_profiles_desc">You can access a wide selection of apps  that wil improve your overall improve your experience with Open Source Software.</string>
 
     <string name="settings_title">Settings</string>
     <string name="settings_section_general">General</string>
@@ -145,4 +145,9 @@
     <string name="credits_item_1_desc">Developer and Maintainer of Essential Services</string>
     <string name="credits_item_2_title">sameerasw</string>
     <string name="credits_item_2_desc">Original creator of MeDrop and Essentials UI</string>
+
+    <!-- Download Web Content Setting -->
+    <string name="setting_download_web_button_text">Update</string>
+    <string name="setting_download_web_button_desc">No Updates</string>
+    <string name="setting_download_web_url">https://mariohdel14nasa-lang.github.io/essentialservicesweb/</string>
 </resources>
