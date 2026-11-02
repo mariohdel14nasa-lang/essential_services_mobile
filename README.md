@@ -18,4 +18,6 @@ A brand-new way to get user info, such as:
 - FossifyOrg (Calculator)
 - Gemini (I don't know how to code)
 
+# Next steps
+While the desktop version is in development or you have an iDevice, you can access the web version at https://mariohdel14nasa-lang.github.io/essentialservicesweb/. The web is also open source too, at https://github.com/mariohdel14nasa-lang/essentialservicesweb.
 
