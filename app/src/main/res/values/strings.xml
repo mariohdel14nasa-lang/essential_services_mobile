@@ -137,6 +137,7 @@
     <string name="feat_medrop_add_tile_title">Quick Settings Tile</string>
     <string name="feat_medrop_add_tile_desc">Add the Essential Services tile to your Quick Settings panel for one-tap sharing</string>
     <string name="feat_medrop_tile_added">Added to Quick Settings</string>
+    <string name="about_github_open_issue">Open a GitHub Issue</string>
 
     <!-- Credits Section -->
     <string name="settings_section_credits">Credis To...</string>

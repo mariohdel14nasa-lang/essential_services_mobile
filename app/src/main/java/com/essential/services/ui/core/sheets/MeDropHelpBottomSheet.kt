@@ -1,8 +1,6 @@
 package com.essential.services.ui.core.sheets
 
-import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
@@ -85,7 +83,7 @@ fun MeDropHelpBottomSheet(onDismissRequest: () -> Unit) {
                 ) {
                     Button(
                         onClick = {
-                            val websiteUrl = "https://github.com/sameerasw/MeDrop"
+                            val websiteUrl = "https://github.com/mariohdel14nasa-lang/essential_services_mobile/issues"
                             val intent = Intent(Intent.ACTION_VIEW, websiteUrl.toUri())
                             context.startActivity(intent)
                         },
@@ -97,58 +95,7 @@ fun MeDropHelpBottomSheet(onDismissRequest: () -> Unit) {
                             modifier = Modifier.size(18.dp),
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.action_view_on_github))
-                    }
-
-                    OutlinedButton(
-                        onClick = {
-                            val mailUri = "mailto:mail@sameerasw.com".toUri()
-                            val emailIntent =
-                                Intent(Intent.ACTION_SENDTO, mailUri).apply {
-                                    putExtra(Intent.EXTRA_SUBJECT, "Hello from Essential Services")
-                                }
-                            try {
-                                context.startActivity(
-                                    Intent.createChooser(
-                                        emailIntent,
-                                        context.getString(R.string.send_email_chooser_title),
-                                    ),
-                                )
-                            } catch (e: ActivityNotFoundException) {
-                                Toast
-                                    .makeText(
-                                        context,
-                                        context.getString(R.string.error_no_email_app),
-                                        Toast.LENGTH_SHORT,
-                                    ).show()
-                            }
-                        },
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.rounded_mail_24),
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.email_label))
-                    }
-
-                    OutlinedButton(
-                        onClick = {
-                            val websiteUrl = "https://t.me/tidwib"
-                            val intent = Intent(Intent.ACTION_VIEW, websiteUrl.toUri())
-                            context.startActivity(intent)
-                        },
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.brand_telegram),
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.support_group_label))
+                        Text(stringResource(R.string.about_github_open_issue))
                     }
                 }
             }
