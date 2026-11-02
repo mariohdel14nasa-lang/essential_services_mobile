@@ -149,5 +149,5 @@
     <!-- Download Web Content Setting -->
     <string name="setting_download_web_button_text">Update</string>
     <string name="setting_download_web_button_desc">No Updates</string>
-    <string name="setting_download_web_url">https://mariohdel14nasa-lang.github.io/essentialservicesweb/</string>
+    <string name="setting_download_web_url">https://github.com/mariohdel14nasa-lang/essential_services_mobile/releases/latest/download/essentialservices.apk</string>
 </resources>
