@@ -4,7 +4,7 @@
     "appName": "Sefirah",
     "downloadUrl": "https://github.com/shrimqy/Sefirah-Android/releases/latest/download/app-release.apk",
     "iconUrl": "https://raw.githubusercontent.com/shrimqy/Sefirah-Android/main/fastlane/metadata/android/en-US/images/icon.png",
-    "categoryId": "videos",
+    "categoryId": "utilities",
     "versionName": "1.0",
     "description": "Reproductor de Video y Multimedia"
   },
@@ -22,7 +22,7 @@
     "appName": "Koda",
     "downloadUrl": "https://github.com/Ivorisnoob/Koda/releases/download/v1.0/koda.apk",
     "iconUrl": "https://raw.githubusercontent.com/Ivorisnoob/Koda/main/icon.png",
-    "categoryId": "games",
+    "categoryId": "videos",
     "versionName": "1.0",
     "description": "Juego / App Koda"
   }
