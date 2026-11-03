@@ -146,6 +146,22 @@
     <string name="credits_item_2_title">sameerasw</string>
     <string name="credits_item_2_desc">Original creator of MeDrop and Essentials UI</string>
 
+    <!-- App Categories -->
+    <string name="category_videos">Videos y Pelis</string>
+    <string name="category_utilities">Utilidades</string>
+    <string name="category_games">Juegos</string>
+    <string name="category_music">Música</string>
+    <string name="action_add_app">Añadir App por Enlace</string>
+    <string name="action_download_update">Descargar</string>
+    <string name="action_install_app">Instalar App</string>
+    <string name="dialog_add_app_title">Añadir Nueva App</string>
+    <string name="dialog_app_name">Nombre de la App</string>
+    <string name="dialog_app_url">Enlace de descarga (.apk)</string>
+    <string name="dialog_app_icon">URL del Icono / Imagen (opcional)</string>
+    <string name="dialog_app_category">Categoría</string>
+    <string name="dialog_app_description">Descripción (opcional)</string>
+    <string name="dialog_app_version">Versión (opcional)</string>
+
     <!-- Download Web Content Setting -->
     <string name="setting_download_web_button_text">Update</string>
     <string name="setting_download_web_button_desc">No Updates</string>

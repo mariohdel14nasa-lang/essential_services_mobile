@@ -62,7 +62,11 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.gson.Gson
+import com.essential.services.data.model.AppCategory
+import com.essential.services.data.repository.AppRepository
 import com.essential.services.data.repository.MeDropRepository
+import com.essential.services.ui.components.MeDropVerticalFloatingToolbar
+import com.essential.services.ui.core.sheets.AddAppBottomSheet
 import com.essential.services.domain.model.MeDropProfileType
 import com.essential.services.domain.model.MeDropSettings
 import com.essential.services.ui.activities.SettingsActivity
@@ -297,6 +301,8 @@ class MainActivity : AppCompatActivity() {
             }
 
             var showPermissionsSheet by remember { mutableStateOf(false) }
+            var selectedCategory by remember { mutableStateOf(AppCategory.UTILITIES) }
+            var showAddAppSheet by remember { mutableStateOf(false) }
 
             val contactPickerLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.StartActivityForResult()
@@ -497,7 +503,10 @@ class MainActivity : AppCompatActivity() {
                                         Spacer(
                                             modifier = Modifier.height(WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 8.dp),
                                         )
-                                        ApkListUI()
+                                        ApkListUI(
+                                            selectedCategory = selectedCategory,
+                                            onAddAppClick = { showAddAppSheet = true },
+                                        )
                                         Spacer(
                                             modifier = Modifier.height(bottomPaddingDp + 60.dp),
                                         )
@@ -528,24 +537,59 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
 
+                        if (activeProfileType == MeDropProfileType.CUSTOM) {
+                            MeDropVerticalFloatingToolbar(
+                                selectedCategory = selectedCategory,
+                                onCategorySelected = { cat ->
+                                    selectedCategory = cat
+                                },
+                                onSettingsClick = {
+                                    HapticUtil.performVirtualKeyHaptic(view)
+                                    val intent = Intent(context, SettingsActivity::class.java)
+                                    context.startActivity(intent)
+                                },
+                                onAddAppClick = {
+                                    showAddAppSheet = true
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .zIndex(2f),
+                            )
+                        }
+
                         val toolbarOffsetY = with(density) { (1f - entranceProgress.value) * 150.dp.toPx() }
                         MeDropFloatingToolbar(
                             items = toolbarItems,
                             selectedIndex = pagerState.currentPage.coerceIn(0, toolbarItems.size - 1),
-                            fabIconRes = R.drawable.rounded_settings_24,
+                            fabIconRes = if (activeProfileType == MeDropProfileType.CUSTOM) R.drawable.rounded_add_24 else R.drawable.rounded_settings_24,
                             fabHasBadge = false,
                             fabAction = {
                                 HapticUtil.performVirtualKeyHaptic(view)
-                                val intent = Intent(context, SettingsActivity::class.java)
-                                context.startActivity(intent)
+                                if (activeProfileType == MeDropProfileType.CUSTOM) {
+                                    showAddAppSheet = true
+                                } else {
+                                    val intent = Intent(context, SettingsActivity::class.java)
+                                    context.startActivity(intent)
+                                }
                             },
-                            fabContentDescription = stringResource(R.string.action_settings),
+                            fabContentDescription = if (activeProfileType == MeDropProfileType.CUSTOM) stringResource(R.string.action_add_app) else stringResource(R.string.action_settings),
                             modifier =
                                 Modifier
                                     .align(Alignment.BottomCenter)
                                     .offset { androidx.compose.ui.unit.IntOffset(0, toolbarOffsetY.toInt()) }
                                     .graphicsLayer { alpha = entranceProgress.value }
                                     .zIndex(1f),
+                        )
+                    }
+
+                    if (showAddAppSheet) {
+                        val repository = remember(context) { AppRepository(context) }
+                        AddAppBottomSheet(
+                            initialCategory = selectedCategory,
+                            onSave = { name, url, iconUrl, category, desc ->
+                                repository.addCustomApp(name, url, iconUrl, category, desc, "1.0")
+                            },
+                            onDismissRequest = { showAddAppSheet = false },
                         )
                     }
 
