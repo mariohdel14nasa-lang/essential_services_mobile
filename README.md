@@ -22,3 +22,13 @@ A brand-new way to get user info, such as:
 # Next steps
 While the desktop version is in development or you have an iDevice, you can access the web version at https://mariohdel14nasa-lang.github.io/essentialservicesweb/. The web is also open source too, at https://github.com/mariohdel14nasa-lang/essentialservicesweb.
 
+# Other versions
+- Web (https://github.com/mariohdel14nasa-lang/essentialservicesweb)
+- Desktop (not yet)
+- Wearables with Android (maybe but idk)
+- Wearables with custom firmware (same as last)
+- TVs with Android TV (soon)
+- TVs with Tizen (probably)
+- Appliances with android (Just download the APK)
+- Appliances  with tizen (Jus use the web)
+
