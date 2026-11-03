@@ -50,3 +50,5 @@ While the desktop version is in development or you have an iDevice, you can acce
 - Appliances with android (Just download the APK)
 - Appliances  with tizen (Jus use the web)
 
+## App database
+https://github.com/mariohdel14nasa-lang/essential-app-catalog
