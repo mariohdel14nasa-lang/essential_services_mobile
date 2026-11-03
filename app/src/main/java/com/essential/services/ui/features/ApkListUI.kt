@@ -54,6 +54,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import coil.compose.AsyncImage
 import com.essential.services.R
 import com.essential.services.data.model.AppCategory
@@ -105,6 +107,14 @@ fun ApkListUI(
 
     LaunchedEffect(Unit) {
         refreshApps()
+        withContext(Dispatchers.IO) {
+            val updated = repository.fetchRemoteDatabase()
+            if (updated) {
+                withContext(Dispatchers.Main) {
+                    refreshApps()
+                }
+            }
+        }
     }
 
     val categoryApps = remember(allApps, selectedCategory) {
