@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -65,7 +66,7 @@ import com.google.gson.Gson
 import com.essential.services.data.model.AppCategory
 import com.essential.services.data.repository.AppRepository
 import com.essential.services.data.repository.MeDropRepository
-import com.essential.services.ui.components.MeDropVerticalFloatingToolbar
+import com.essential.services.ui.components.MeDropCategoryFloatingToolbar
 import com.essential.services.ui.core.sheets.AddAppBottomSheet
 import com.essential.services.domain.model.MeDropProfileType
 import com.essential.services.domain.model.MeDropSettings
@@ -505,7 +506,6 @@ class MainActivity : AppCompatActivity() {
                                         )
                                         ApkListUI(
                                             selectedCategory = selectedCategory,
-                                            onAddAppClick = { showAddAppSheet = true },
                                         )
                                         Spacer(
                                             modifier = Modifier.height(bottomPaddingDp + 60.dp),
@@ -537,49 +537,42 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
 
-                        if (activeProfileType == MeDropProfileType.CUSTOM) {
-                            MeDropVerticalFloatingToolbar(
-                                selectedCategory = selectedCategory,
-                                onCategorySelected = { cat ->
-                                    selectedCategory = cat
-                                },
-                                onSettingsClick = {
+                        val toolbarOffsetY = with(density) { (1f - entranceProgress.value) * 150.dp.toPx() }
+
+                        Column(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .offset { androidx.compose.ui.unit.IntOffset(0, toolbarOffsetY.toInt()) }
+                                .graphicsLayer { alpha = entranceProgress.value }
+                                .zIndex(1f),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            if (activeProfileType == MeDropProfileType.CUSTOM) {
+                                MeDropCategoryFloatingToolbar(
+                                    selectedCategory = selectedCategory,
+                                    onCategorySelected = { cat ->
+                                        selectedCategory = cat
+                                    },
+                                    onAddAppClick = {
+                                        showAddAppSheet = true
+                                    },
+                                )
+                            }
+
+                            MeDropFloatingToolbar(
+                                items = toolbarItems,
+                                selectedIndex = pagerState.currentPage.coerceIn(0, toolbarItems.size - 1),
+                                fabIconRes = R.drawable.rounded_settings_24,
+                                fabHasBadge = false,
+                                fabAction = {
                                     HapticUtil.performVirtualKeyHaptic(view)
                                     val intent = Intent(context, SettingsActivity::class.java)
                                     context.startActivity(intent)
                                 },
-                                onAddAppClick = {
-                                    showAddAppSheet = true
-                                },
-                                modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .zIndex(2f),
+                                fabContentDescription = stringResource(R.string.action_settings),
                             )
                         }
-
-                        val toolbarOffsetY = with(density) { (1f - entranceProgress.value) * 150.dp.toPx() }
-                        MeDropFloatingToolbar(
-                            items = toolbarItems,
-                            selectedIndex = pagerState.currentPage.coerceIn(0, toolbarItems.size - 1),
-                            fabIconRes = if (activeProfileType == MeDropProfileType.CUSTOM) R.drawable.rounded_add_24 else R.drawable.rounded_settings_24,
-                            fabHasBadge = false,
-                            fabAction = {
-                                HapticUtil.performVirtualKeyHaptic(view)
-                                if (activeProfileType == MeDropProfileType.CUSTOM) {
-                                    showAddAppSheet = true
-                                } else {
-                                    val intent = Intent(context, SettingsActivity::class.java)
-                                    context.startActivity(intent)
-                                }
-                            },
-                            fabContentDescription = if (activeProfileType == MeDropProfileType.CUSTOM) stringResource(R.string.action_add_app) else stringResource(R.string.action_settings),
-                            modifier =
-                                Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .offset { androidx.compose.ui.unit.IntOffset(0, toolbarOffsetY.toInt()) }
-                                    .graphicsLayer { alpha = entranceProgress.value }
-                                    .zIndex(1f),
-                        )
                     }
 
                     if (showAddAppSheet) {

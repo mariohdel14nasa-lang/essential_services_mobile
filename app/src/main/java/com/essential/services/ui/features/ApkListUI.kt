@@ -9,7 +9,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -60,8 +59,6 @@ import com.essential.services.R
 import com.essential.services.data.model.AppCategory
 import com.essential.services.data.model.AppItem
 import com.essential.services.data.repository.AppRepository
-import com.essential.services.ui.core.containers.RoundedCardContainer
-import com.essential.services.ui.core.sheets.AddAppBottomSheet
 import com.essential.services.utils.ApkInstaller
 import com.essential.services.utils.HapticUtil
 
@@ -81,7 +78,6 @@ fun Drawable.toImageBitmap(): ImageBitmap {
 @Composable
 fun ApkListUI(
     selectedCategory: AppCategory = AppCategory.UTILITIES,
-    onAddAppClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -90,7 +86,6 @@ fun ApkListUI(
 
     val repository = remember(context) { AppRepository(context) }
     var allApps by remember { mutableStateOf<List<AppItem>>(emptyList()) }
-    var showAddAppSheet by remember { mutableStateOf(false) }
 
     val refreshApps = {
         allApps = repository.getAllApps()
@@ -184,59 +179,35 @@ fun ApkListUI(
                         .fillMaxWidth()
                         .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(44.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primaryContainer),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Icon(
-                                painter = painterResource(selectedCategory.iconRes),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        Column {
-                            Text(
-                                text = stringResource(selectedCategory.titleRes),
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                            Text(
-                                text = "${categoryApps.size} apps disponibles",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-
-                    // "+ Añadir App" Button
-                    IconButton(
-                        onClick = {
-                            HapticUtil.performVirtualKeyHaptic(view)
-                            showAddAppSheet = true
-                        },
+                    Box(
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(44.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary),
+                            .background(MaterialTheme.colorScheme.primaryContainer),
+                        contentAlignment = Alignment.Center,
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.rounded_add_24),
-                            contentDescription = stringResource(R.string.action_add_app),
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(20.dp),
+                            painter = painterResource(selectedCategory.iconRes),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column {
+                        Text(
+                            text = stringResource(selectedCategory.titleRes),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            text = "${categoryApps.size} apps disponibles",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -262,30 +233,10 @@ fun ApkListUI(
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
-                            text = "Pulsa en el botón '+' arriba para añadir la primera app por enlace a esta categoría, o añade un archivo .apk en la carpeta assets/apks/",
+                            text = "Pulsa el botón '+' en la barra flotante de categorías abajo para añadir tu primera app a esta categoría.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Button(
-                            onClick = {
-                                HapticUtil.performVirtualKeyHaptic(view)
-                                showAddAppSheet = true
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            ),
-                            shape = RoundedCornerShape(12.dp),
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.rounded_add_24),
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp),
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = stringResource(R.string.action_add_app))
-                        }
                     }
                 }
             } else {
@@ -430,16 +381,5 @@ fun ApkListUI(
                 }
             }
         }
-    }
-
-    if (showAddAppSheet) {
-        AddAppBottomSheet(
-            initialCategory = selectedCategory,
-            onSave = { name, url, iconUrl, category, desc ->
-                repository.addCustomApp(name, url, iconUrl, category, desc, "1.0")
-                refreshApps()
-            },
-            onDismissRequest = { showAddAppSheet = false },
-        )
     }
 }
