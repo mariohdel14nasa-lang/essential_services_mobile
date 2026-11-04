@@ -298,7 +298,7 @@ fun ApkListUI(
                                             contentAlignment = Alignment.Center,
                                         ) {
                                             Icon(
-                                                painter = painterResource(R.drawable.ic_app_essentials),
+                                                painter = painterResource(R.drawable.ic_apps_24),
                                                 contentDescription = app.appName,
                                                 modifier = Modifier.size(28.dp),
                                                 tint = MaterialTheme.colorScheme.onPrimaryContainer,

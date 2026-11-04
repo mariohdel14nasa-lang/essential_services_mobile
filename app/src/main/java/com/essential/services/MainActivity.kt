@@ -402,7 +402,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     )
                     else -> ToolbarItem(
-                        iconRes = R.drawable.medrop_logo,
+                        iconRes = R.drawable.ic_account_circle_24,
                         labelRes = R.string.feat_medrop_profile_contact,
                         onClick = {}
                     )
