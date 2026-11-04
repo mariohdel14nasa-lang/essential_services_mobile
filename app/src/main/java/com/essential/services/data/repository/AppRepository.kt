@@ -118,23 +118,11 @@ class AppRepository(private val context: Context) {
     }
 
     private fun loadCatalogApps(): List<AppItem> {
-        // Try cached remote JSON first
+        // Load from cached remote database JSON
         val cachedRemoteStr = prefs.getString(KEY_CACHED_REMOTE_JSON, null)
         if (!cachedRemoteStr.isNullOrBlank()) {
             val parsed = parseJsonToAppItems(cachedRemoteStr)
             if (parsed.isNotEmpty()) return parsed
-        }
-
-        // Fallback to assets/apks/apps.json or assets/apps.json
-        val possiblePaths = listOf("apks/apps.json", "apps.json")
-        for (assetPath in possiblePaths) {
-            try {
-                context.assets.open(assetPath).use { input ->
-                    val jsonStr = input.bufferedReader().use { it.readText() }
-                    val parsed = parseJsonToAppItems(jsonStr)
-                    if (parsed.isNotEmpty()) return parsed
-                }
-            } catch (_: Exception) {}
         }
 
         return emptyList()
