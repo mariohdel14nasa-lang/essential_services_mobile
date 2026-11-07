@@ -1,7 +1,9 @@
 package com.essential.services.utils
 
 import android.content.Context
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
@@ -117,13 +119,11 @@ object TranslationManager {
     }
 
     fun getActiveTranslationMap(context: Context): Map<String, String> {
-        // Track translationVersionState so Compose tracks state changes and recomposes
         translationVersionState.value
 
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val currentLang = getCurrentLanguage(context)
 
-        // 1. Always prioritize remote cached translation map for the current language
         val cachedJson = prefs.getString(PREFIX_CACHED_LANG + currentLang, null)
         if (!cachedJson.isNullOrBlank()) {
             try {
@@ -142,7 +142,6 @@ object TranslationManager {
             } catch (_: Exception) {}
         }
 
-        // 2. Fallback to local appdata only if no remote translation exists
         return when (currentLang.lowercase()) {
             "en" -> LOCAL_ENGLISH_NUMERICAL_TRANSLATIONS
             else -> LOCAL_SPANISH_NUMERICAL_TRANSLATIONS
@@ -181,7 +180,7 @@ object TranslationManager {
                                     if (parsed != null) mapToSave = parsed
                                 } else {
                                     val mapType = object : TypeToken<Map<String, String>>() {}.type
-                                    val parsed: Map<String, String>? = gson.fromJson(jsonString, mapType)
+                                    val parsed: Map<String, String>? = gson.fromJson(jsonString, type)
                                     if (parsed != null) mapToSave = parsed
                                 }
                             } catch (_: Exception) {}
@@ -194,7 +193,7 @@ object TranslationManager {
                                 .putString(KEY_ACTIVE_TRANSLATION_MAP, jsonMapStr)
                                 .putString(PREFIX_CACHED_LANG + langCode, jsonMapStr)
                                 .apply()
-                            
+
                             withContext(Dispatchers.Main) {
                                 translationVersionState.value++
                             }
@@ -235,7 +234,7 @@ object TranslationManager {
         // 4. Trimmed lookup
         map[keyOrNum.trim()]?.let { if (it.isNotBlank() && !it.all { c -> c.isDigit() }) return it }
 
-        return if (fallback.isNotBlank() && !fallback.all { it.isDigit() }) fallback else keyOrNum
+        return if (fallback.isNotBlank() && !fallback.all { c -> c.isDigit() }) fallback else keyOrNum
     }
 
     fun getString(context: Context, resId: Int): String {
@@ -250,6 +249,12 @@ object TranslationManager {
                 ""
             }
         }
+    }
+
+    @Composable
+    fun stringResource(resId: Int): String {
+        val context = LocalContext.current
+        return getString(context, resId)
     }
 
     private fun resolveNumericalIdFromResources(context: Context, keyStr: String): String? {
