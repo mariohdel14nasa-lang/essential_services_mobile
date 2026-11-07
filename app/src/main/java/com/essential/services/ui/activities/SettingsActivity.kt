@@ -1,6 +1,5 @@
 package com.essential.services.ui.activities
 
-import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.res.Configuration
@@ -9,13 +8,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -24,14 +22,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,10 +41,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.Lifecycle
@@ -51,6 +58,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.essential.services.R
 import com.essential.services.domain.model.MeDropProfileType
+import com.essential.services.domain.model.MeDropSettings
 import com.essential.services.ui.components.CreditsMarkdownUI
 import com.essential.services.ui.components.MeDropFloatingToolbar
 import com.essential.services.ui.components.dialogs.AboutSection
@@ -58,15 +66,15 @@ import com.essential.services.ui.core.cards.FeatureCard
 import com.essential.services.ui.core.cards.IconToggleItem
 import com.essential.services.ui.core.containers.RoundedCardContainer
 import com.essential.services.ui.core.sheets.MeDropHelpBottomSheet
-import com.essential.services.ui.core.sheets.PermissionItem
-import com.essential.services.ui.core.sheets.PermissionsBottomSheet
 import com.essential.services.ui.modifiers.BlurDirection
 import com.essential.services.ui.modifiers.progressiveBlur
 import com.essential.services.ui.theme.MeDropTheme
-import com.essential.services.utils.MeDropContactPickerHelper
-import com.essential.services.utils.PermissionUtils
+import com.essential.services.utils.ApkInstaller
+import com.essential.services.utils.AppColorManager
+import com.essential.services.utils.SettingsMenuManager
 import com.essential.services.viewmodels.MeDropViewModel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class SettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,8 +102,8 @@ class SettingsActivity : ComponentActivity() {
 
         setContent {
             val context = LocalContext.current
+            val view = LocalView.current
             val viewModel: MeDropViewModel = viewModel()
-            val scope = rememberCoroutineScope()
 
             val goBackToContact = {
                 viewModel.setMeDropActiveProfile(context, MeDropProfileType.CONTACT)
@@ -110,12 +118,27 @@ class SettingsActivity : ComponentActivity() {
                 goBackToContact()
             }
 
+            val scope = rememberCoroutineScope()
+            var settingsMenuData by remember { mutableStateOf(SettingsMenuManager.getCachedSettingsMenu(context)) }
+
+            val fetchSettings = {
+                scope.launch(Dispatchers.IO) {
+                    val fresh = SettingsMenuManager.fetchAndCacheSettingsMenu(context)
+                    if (fresh != null) {
+                        withContext(Dispatchers.Main) {
+                            settingsMenuData = fresh
+                        }
+                    }
+                }
+            }
+
             val lifecycleOwner = LocalLifecycleOwner.current
             DisposableEffect(lifecycleOwner) {
                 val observer =
                     LifecycleEventObserver { _, event ->
                         if (event == Lifecycle.Event.ON_RESUME) {
                             viewModel.check(context)
+                            fetchSettings()
                         }
                     }
                 lifecycleOwner.lifecycle.addObserver(observer)
@@ -126,16 +149,21 @@ class SettingsActivity : ComponentActivity() {
 
             LaunchedEffect(Unit) {
                 viewModel.check(context)
+                fetchSettings()
             }
 
             val isPitchBlackThemeEnabled by viewModel.isPitchBlackThemeEnabled
             val isBlurEnabled by viewModel.isBlurEnabled
             val isAllowWhenLocked by viewModel.isMeDropAllowWhenLocked
+            val isDeveloperModeEnabled by viewModel.isDeveloperModeEnabled
             val settings by viewModel.meDropSettings
-            val safeSettings = settings ?: com.essential.services.domain.model.MeDropSettings()
+            val safeSettings = settings ?: MeDropSettings()
             val density = LocalDensity.current
 
-            MeDropTheme(pitchBlackTheme = isPitchBlackThemeEnabled) {
+            MeDropTheme(
+                pitchBlackTheme = isPitchBlackThemeEnabled,
+                remoteColors = viewModel.remoteColors.value,
+            ) {
                 Scaffold(
                     contentWindowInsets = WindowInsets(0, 0, 0, 0),
                     containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -179,144 +207,210 @@ class SettingsActivity : ComponentActivity() {
                                     ),
                             )
 
-                            Text(
-                                text = stringResource(R.string.settings_section_more_profiles),
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(start = 8.dp),
-                            )
-
-                            RoundedCardContainer {
-                                IconToggleItem(
-                                    iconRes = R.drawable.ic_apps_24,
-                                    title = stringResource(R.string.feat_medrop_profile_custom),
-                                    description = stringResource(R.string.feat_medrop_profile_custom_desc),
-                                    isChecked = safeSettings.customProfile.enabled,
-                                    onCheckedChange = { viewModel.setMeDropProfileEnabled(context, MeDropProfileType.CUSTOM, it) },
-                                )
-                            }
-
-                            Text(
-                                text = stringResource(R.string.settings_section_general),
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(start = 8.dp),
-                            )
-
-                            RoundedCardContainer {
-                                IconToggleItem(
-                                    iconRes = R.drawable.rounded_globe_24,
-                                    title = stringResource(R.string.setting_deeplink_sharing_title),
-                                    description = stringResource(R.string.setting_deeplink_sharing_desc),
-                                    isChecked = safeSettings.enableDeepLinkSharing,
-                                    onCheckedChange = { viewModel.setEnableDeepLinkSharing(context, it) },
-                                )
-                                IconToggleItem(
-                                    iconRes = R.drawable.rounded_lock_24,
-                                    title = stringResource(R.string.feat_medrop_allow_when_locked),
-                                    description = stringResource(R.string.feat_medrop_allow_when_locked_desc),
-                                    isChecked = isAllowWhenLocked,
-                                    onCheckedChange = { viewModel.setMeDropAllowWhenLocked(context, it) },
-                                )
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                    IconToggleItem(
-                                        iconRes = R.drawable.rounded_blur_on_24,
-                                        title = stringResource(R.string.feat_medrop_show_ripple),
-                                        isChecked = safeSettings.showRipple,
-                                        onCheckedChange = { viewModel.setMeDropShowRipple(context, it) },
-                                    )
+                            // Render Sections dynamically from remote/cached JSON
+                            settingsMenuData.sections.forEach { section ->
+                                val visibleItems = section.items.filter { item ->
+                                    item.minSdk <= Build.VERSION.SDK_INT
                                 }
-                            }
 
-                            FeatureCard(
-                                title = stringResource(R.string.setting_download_web_button_text),
-                                description = null,
-                                iconRes = R.drawable.ic_download_new,
-                                containerColor = androidx.compose.ui.graphics.Color(0xFF1A73E8),
-                                accentColor = androidx.compose.ui.graphics.Color(0xFF1557B0),
-                                onClick = {
-                                    val webUrl = context.getString(R.string.setting_download_web_url)
-                                    if (webUrl.endsWith(".apk", ignoreCase = true)) {
-                                        com.essential.services.utils.ApkInstaller.downloadAndInstallApk(context, webUrl)
-                                    } else {
-                                        android.widget.Toast.makeText(context, "Checking for updates...", android.widget.Toast.LENGTH_SHORT).show()
-                                        @android.annotation.SuppressLint("SetJavaScriptEnabled")
-                                        android.webkit.WebView(context).apply {
-                                            this.settings.javaScriptEnabled = true
-                                            this.settings.domStorageEnabled = true
+                                if (visibleItems.isNotEmpty()) {
+                                    if (section.title.isNotBlank()) {
+                                        Text(
+                                            text = section.title,
+                                            style = MaterialTheme.typography.labelLarge,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.padding(start = 8.dp),
+                                        )
+                                    }
 
-                                            setDownloadListener { downloadUrl, _, _, mimetype, _ ->
-                                                if (downloadUrl.endsWith(".apk", ignoreCase = true) || mimetype == "application/vnd.android.package-archive") {
-                                                    com.essential.services.utils.ApkInstaller.downloadAndInstallApk(context, downloadUrl)
-                                                }
-                                            }
-
-                                            webViewClient = object : android.webkit.WebViewClient() {
-                                                private var isHandled = false
-
-                                                override fun shouldOverrideUrlLoading(view: android.webkit.WebView?, request: android.webkit.WebResourceRequest?): Boolean {
-                                                    val requestUrl = request?.url?.toString() ?: ""
-                                                    if (requestUrl.endsWith(".apk", ignoreCase = true)) {
-                                                        com.essential.services.utils.ApkInstaller.downloadAndInstallApk(context, requestUrl)
-                                                        return true
+                                    val toggleItems = visibleItems.filter { it.type == "toggle" }
+                                    if (toggleItems.isNotEmpty()) {
+                                        RoundedCardContainer {
+                                            toggleItems.forEach { item ->
+                                                val iconRes = SettingsMenuManager.getDrawableResId(context, item.icon)
+                                                val (isChecked, onToggle) = when (item.action) {
+                                                    "TOGGLE_CUSTOM_PROFILE" -> Pair(safeSettings.customProfile.enabled) { enabled: Boolean ->
+                                                        viewModel.setMeDropProfileEnabled(context, MeDropProfileType.CUSTOM, enabled)
                                                     }
-                                                    return super.shouldOverrideUrlLoading(view, request)
+                                                    "TOGGLE_DEEPLINK_SHARING" -> Pair(safeSettings.enableDeepLinkSharing) { enabled: Boolean ->
+                                                        viewModel.setEnableDeepLinkSharing(context, enabled)
+                                                    }
+                                                    "TOGGLE_ALLOW_WHEN_LOCKED" -> Pair(isAllowWhenLocked) { enabled: Boolean ->
+                                                        viewModel.setMeDropAllowWhenLocked(context, enabled)
+                                                    }
+                                                    "TOGGLE_SHOW_RIPPLE" -> Pair(safeSettings.showRipple) { enabled: Boolean ->
+                                                        viewModel.setMeDropShowRipple(context, enabled)
+                                                    }
+                                                    "TOGGLE_PITCH_BLACK" -> Pair(isPitchBlackThemeEnabled) { enabled: Boolean ->
+                                                        viewModel.setPitchBlackTheme(context, enabled)
+                                                    }
+                                                    "TOGGLE_USE_BLUR" -> Pair(isBlurEnabled) { enabled: Boolean ->
+                                                        viewModel.setBlurEnabled(context, enabled)
+                                                    }
+                                                    else -> Pair(false) { _: Boolean -> }
                                                 }
 
-                                                override fun onPageFinished(view: android.webkit.WebView?, loadedUrl: String?) {
-                                                    super.onPageFinished(view, loadedUrl)
-                                                    if (!isHandled) {
-                                                        isHandled = true
-                                                        view?.evaluateJavascript("(function() { return JSON.stringify(localStorage); })();") { result ->
-                                                            if (!result.isNullOrEmpty() && result != "null") {
-                                                                val cleanJson = if (result.startsWith("\"") && result.endsWith("\"")) {
-                                                                    try {
-                                                                        com.google.gson.Gson().fromJson(result, String::class.java)
-                                                                    } catch (_: Exception) { result }
-                                                                } else result
-                                                                com.essential.services.data.repository.MeDropRepository(context).saveWebViewLocalStorage(cleanJson)
+                                                IconToggleItem(
+                                                    iconRes = iconRes,
+                                                    title = item.title,
+                                                    description = item.description,
+                                                    isChecked = isChecked,
+                                                    onCheckedChange = onToggle,
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    visibleItems.filter { it.type == "selector_card" }.forEach { item ->
+                                        val iconRes = SettingsMenuManager.getDrawableResId(context, item.icon)
+                                        val cardColor = AppColorManager.getNamedColor(context, item.colorKey ?: "green", androidx.compose.ui.graphics.Color(0xFF488066))
+                                        val subItems = item.items ?: emptyList()
+
+                                        RoundedCardContainer {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(16.dp),
+                                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                                            ) {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                                ) {
+                                                    Icon(
+                                                        painter = painterResource(iconRes),
+                                                        contentDescription = null,
+                                                        tint = cardColor,
+                                                        modifier = Modifier.size(24.dp)
+                                                    )
+                                                    Text(
+                                                        text = item.title,
+                                                        style = MaterialTheme.typography.titleMedium,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = MaterialTheme.colorScheme.onSurface
+                                                    )
+                                                }
+
+                                                if (subItems.isNotEmpty()) {
+                                                    Row(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                                    ) {
+                                                        subItems.forEach { subItem ->
+                                                            val subColor = AppColorManager.getNamedColor(context, subItem.colorKey ?: "green", cardColor)
+                                                            Button(
+                                                                onClick = {
+                                                                    com.essential.services.utils.HapticUtil.performVirtualKeyHaptic(view)
+                                                                    val fetchUrl = subItem.translationsURLfetch ?: ""
+                                                                    if (fetchUrl.startsWith("http", ignoreCase = true)) {
+                                                                        android.widget.Toast.makeText(context, "Fetching language: ${subItem.title}", android.widget.Toast.LENGTH_SHORT).show()
+                                                                    } else if (subItem.action == "CHECK_UPDATE") {
+                                                                        val targetUrl = subItem.targetUrl ?: context.getString(R.string.setting_download_web_url)
+                                                                        ApkInstaller.downloadAndInstallApk(context, targetUrl)
+                                                                    } else {
+                                                                        android.widget.Toast.makeText(context, "Language: ${subItem.title}", android.widget.Toast.LENGTH_SHORT).show()
+                                                                    }
+                                                                },
+                                                                colors = ButtonDefaults.buttonColors(
+                                                                    containerColor = subColor,
+                                                                    contentColor = androidx.compose.ui.graphics.Color.White
+                                                                ),
+                                                                shape = RoundedCornerShape(12.dp),
+                                                                modifier = Modifier.weight(1f)
+                                                            ) {
+                                                                Text(
+                                                                    text = subItem.title,
+                                                                    style = MaterialTheme.typography.bodyMedium,
+                                                                    fontWeight = FontWeight.Medium
+                                                                )
                                                             }
-                                                            viewModel.setMeDropActiveProfile(context, com.essential.services.domain.model.MeDropProfileType.CONTACT)
-                                                            val intent = Intent(context, com.essential.services.MainActivity::class.java).apply {
-                                                                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                                                            }
-                                                            context.startActivity(intent)
-                                                            (context as? Activity)?.finish()
                                                         }
                                                     }
                                                 }
                                             }
-                                            loadUrl(webUrl)
                                         }
                                     }
-                                },
-                            )
 
-                            Text(
-                                text = stringResource(R.string.settings_section_appearance),
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(start = 8.dp),
-                            )
+                                    visibleItems.filter { it.type == "feature_card" }.forEach { item ->
+                                        val iconRes = SettingsMenuManager.getDrawableResId(context, item.icon)
+                                        val containerColor = AppColorManager.getNamedColor(context, item.colorKey ?: "green", androidx.compose.ui.graphics.Color(0xFF488066))
+                                        val accentColor = containerColor.copy(alpha = 0.8f)
 
-                            RoundedCardContainer {
-                                IconToggleItem(
-                                    iconRes = R.drawable.rounded_palette_24,
-                                    title = stringResource(R.string.setting_pitch_black_theme_title),
-                                    description = stringResource(R.string.setting_pitch_black_theme_desc),
-                                    isChecked = isPitchBlackThemeEnabled,
-                                    onCheckedChange = { viewModel.setPitchBlackTheme(context, it) },
-                                )
-                                IconToggleItem(
-                                    iconRes = R.drawable.rounded_blur_on_24,
-                                    title = stringResource(R.string.label_use_blur),
-                                    description = stringResource(R.string.desc_use_blur),
-                                    isChecked = isBlurEnabled,
-                                    onCheckedChange = { viewModel.setBlurEnabled(context, it) },
-                                )
+                                        FeatureCard(
+                                            title = item.title,
+                                            description = item.description,
+                                            iconRes = iconRes,
+                                            containerColor = containerColor,
+                                            accentColor = accentColor,
+                                            onClick = {
+                                                val targetUrl = item.targetUrl ?: context.getString(R.string.setting_download_web_url)
+                                                if (targetUrl.endsWith(".apk", ignoreCase = true)) {
+                                                    ApkInstaller.downloadAndInstallApk(context, targetUrl)
+                                                } else {
+                                                    android.widget.Toast.makeText(context, "Checking for updates...", android.widget.Toast.LENGTH_SHORT).show()
+                                                    @android.annotation.SuppressLint("SetJavaScriptEnabled")
+                                                    android.webkit.WebView(context).apply {
+                                                        this.settings.javaScriptEnabled = true
+                                                        this.settings.domStorageEnabled = true
+                                                        setDownloadListener { downloadUrl, _, _, mimetype, _ ->
+                                                            if (downloadUrl.endsWith(".apk", ignoreCase = true) || mimetype == "application/vnd.android.package-archive") {
+                                                                ApkInstaller.downloadAndInstallApk(context, downloadUrl)
+                                                            }
+                                                        }
+                                                        webViewClient = object : android.webkit.WebViewClient() {
+                                                            private var isHandled = false
+                                                            override fun shouldOverrideUrlLoading(view: android.webkit.WebView?, request: android.webkit.WebResourceRequest?): Boolean {
+                                                                val requestUrl = request?.url?.toString() ?: ""
+                                                                if (requestUrl.endsWith(".apk", ignoreCase = true)) {
+                                                                    ApkInstaller.downloadAndInstallApk(context, requestUrl)
+                                                                    return true
+                                                                }
+                                                                return super.shouldOverrideUrlLoading(view, request)
+                                                            }
+                                                            override fun onPageFinished(view: android.webkit.WebView?, loadedUrl: String?) {
+                                                                super.onPageFinished(view, loadedUrl)
+                                                                if (!isHandled) {
+                                                                    isHandled = true
+                                                                    viewModel.setMeDropActiveProfile(context, MeDropProfileType.CONTACT)
+                                                                    val intent = Intent(context, com.essential.services.MainActivity::class.java).apply {
+                                                                        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                                                                    }
+                                                                    context.startActivity(intent)
+                                                                    (context as? Activity)?.finish()
+                                                                }
+                                                            }
+                                                        }
+                                                        loadUrl(targetUrl)
+                                                    }
+                                                }
+                                            },
+                                        )
+                                    }
+
+                                    visibleItems.filter { it.type == "credits" }.forEach { item ->
+                                        RoundedCardContainer {
+                                            CreditsMarkdownUI(fileName = item.fileName ?: "credits.md")
+                                        }
+                                    }
+
+                                    visibleItems.filter { it.type == "about" }.forEach { _ ->
+                                        RoundedCardContainer {
+                                            AboutSection(
+                                                onAvatarLongClick = {
+                                                    val newState = !isDeveloperModeEnabled
+                                                    viewModel.setDeveloperModeEnabled(context, newState)
+                                                    android.widget.Toast.makeText(
+                                                        context,
+                                                        if (newState) context.getString(R.string.developer_options_enabled_toast)
+                                                        else context.getString(R.string.developer_options_disabled_toast),
+                                                        android.widget.Toast.LENGTH_SHORT
+                                                    ).show()
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
                             }
-
-                            val isDeveloperModeEnabled by viewModel.isDeveloperModeEnabled
 
                             if (isDeveloperModeEnabled) {
                                 Text(
@@ -335,32 +429,6 @@ class SettingsActivity : ComponentActivity() {
                                 }
                             }
 
-                            Text(
-                                text = stringResource(R.string.settings_section_credits),
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(start = 8.dp),
-                            )
-
-                            RoundedCardContainer {
-                                CreditsMarkdownUI(fileName = "credits.md")
-                            }
-
-                            RoundedCardContainer {
-                                AboutSection(
-                                    onAvatarLongClick = {
-                                        val newState = !isDeveloperModeEnabled
-                                        viewModel.setDeveloperModeEnabled(context, newState)
-                                        android.widget.Toast.makeText(
-                                            context,
-                                            if (newState) context.getString(R.string.developer_options_enabled_toast)
-                                            else context.getString(R.string.developer_options_disabled_toast),
-                                            android.widget.Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                )
-                            }
-
                             Spacer(
                                 modifier =
                                     Modifier.height(
@@ -374,7 +442,7 @@ class SettingsActivity : ComponentActivity() {
                         var showHelpSheet by remember { mutableStateOf(false) }
 
                         MeDropFloatingToolbar(
-                            title = stringResource(R.string.settings_title),
+                            title = settingsMenuData.title.ifBlank { stringResource(R.string.settings_title) },
                             onBackClick = { goBackToContact() },
                             onHelpClick = { showHelpSheet = true },
                             modifier =

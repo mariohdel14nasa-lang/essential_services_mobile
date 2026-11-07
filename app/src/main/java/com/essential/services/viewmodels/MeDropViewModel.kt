@@ -3,7 +3,11 @@ package com.essential.services.viewmodels
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.essential.services.data.repository.MeDropRepository
 import com.essential.services.domain.model.MeDropContact
 import com.essential.services.domain.model.MeDropProfile
@@ -18,6 +22,20 @@ class MeDropViewModel : ViewModel() {
     val isBlurEnabled = mutableStateOf(true)
     val isDeveloperModeEnabled = mutableStateOf(false)
     val hasContactsPermission = mutableStateOf(false)
+    val remoteColors = mutableStateOf<List<androidx.compose.ui.graphics.Color>>(emptyList())
+
+    fun loadRemoteColors(context: Context) {
+        remoteColors.value = com.essential.services.utils.AppColorManager.getCachedColors(context)
+        viewModelScope.launch(Dispatchers.IO) {
+            val fetched = com.essential.services.utils.AppColorManager.fetchAndCacheColors(context)
+            if (fetched.isNotEmpty()) {
+                withContext(Dispatchers.Main) {
+                    remoteColors.value = fetched
+                }
+            }
+        }
+    }
+
     fun check(context: Context) {
         val repo = MeDropRepository(context)
         isPitchBlackThemeEnabled.value = repo.isPitchBlackThemeEnabled()
@@ -25,6 +43,7 @@ class MeDropViewModel : ViewModel() {
         isDeveloperModeEnabled.value = repo.isDeveloperModeEnabled()
         hasContactsPermission.value = PermissionUtils.hasContactsPermission(context)
         loadMeDropSettings(context)
+        loadRemoteColors(context)
     }
 
     fun setPitchBlackTheme(context: Context, enabled: Boolean) {

@@ -411,7 +411,10 @@ class MainActivity : AppCompatActivity() {
 
             val activeProfileType = enabledTabs.getOrNull(pagerState.currentPage) ?: MeDropProfileType.CONTACT
 
-            MeDropTheme(pitchBlackTheme = isPitchBlackThemeEnabled) {
+            MeDropTheme(
+                pitchBlackTheme = isPitchBlackThemeEnabled,
+                remoteColors = viewModel.remoteColors.value,
+            ) {
                 Scaffold(
                     contentWindowInsets = WindowInsets(0, 0, 0, 0),
                     containerColor = MaterialTheme.colorScheme.surfaceContainer,

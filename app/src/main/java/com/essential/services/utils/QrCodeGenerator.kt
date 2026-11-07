@@ -102,7 +102,7 @@ object QrCodeGenerator {
 
     fun getAppLogoBitmap(context: Context): Bitmap? {
         return try {
-            val drawable = ContextCompat.getDrawable(context, R.mipmap.ic_launcher) ?: return null
+            val drawable = ContextCompat.getDrawable(context, R.drawable.essential_account_mobile) ?: return null
             val bitmap = Bitmap.createBitmap(
                 max(1, drawable.intrinsicWidth),
                 max(1, drawable.intrinsicHeight),
