@@ -167,4 +167,53 @@
     <string name="setting_download_web_button_desc">No Updates</string>
     <string name="setting_download_web_url">https://github.com/mariohdel14nasa-lang/essential_services_mobile/releases/latest/download/essentialservices.apk</string>
     <string name="settings_menu_version">1.4</string>
+
+    <!-- Onboarding Strings -->
+    <string name="onboarding_title_1">Bienvenido a Essential Services</string>
+    <string name="onboarding_desc_1">Comparte tu tarjeta digital, perfiles y datos de cuenta mediante NFC y enlaces de forma rápida y segura.</string>
+    <string name="onboarding_title_2">Explora Apps Esenciales</string>
+    <string name="onboarding_desc_2">Descubre una amplia selección de aplicaciones multimedia, utilidades, juegos y música listos para instalar.</string>
+    <string name="onboarding_title_3">Todo Configurado</string>
+    <string name="onboarding_desc_3">Personaliza tus ajustes, colores, temas y mosaicos rápidos para disfrutar de la mejor experiencia.</string>
+    <string name="onboarding_action_next">Siguiente</string>
+    <string name="onboarding_action_start">Empezar</string>
+    <string name="onboarding_action_skip">Omitir</string>
+    <!-- Configurable Numerical Translation Keys for All App Items -->
+    <string name="num_key_app_name">1</string>
+    <string name="num_key_settings_title">2</string>
+    <string name="num_key_settings_section_more_profiles">3</string>
+    <string name="num_key_settings_section_general">4</string>
+    <string name="num_key_settings_section_appearance">5</string>
+    <string name="num_key_settings_section_credits">6</string>
+    <string name="num_key_about_title">7</string>
+    <string name="num_key_feat_medrop_profile_contact">8</string>
+    <string name="num_key_feat_medrop_profile_custom">9</string>
+    <string name="num_key_feat_medrop_profile_custom_desc">10</string>
+    <string name="num_key_setting_deeplink_sharing_title">11</string>
+    <string name="num_key_setting_deeplink_sharing_desc">12</string>
+    <string name="num_key_feat_medrop_allow_when_locked">13</string>
+    <string name="num_key_feat_medrop_allow_when_locked_desc">14</string>
+    <string name="num_key_setting_download_web_button_text">15</string>
+    <string name="num_key_setting_pitch_black_theme_title">16</string>
+    <string name="num_key_setting_pitch_black_theme_desc">17</string>
+    <string name="num_key_label_use_blur">18</string>
+    <string name="num_key_desc_use_blur">19</string>
+    <string name="num_key_credits_item_1_desc">20</string>
+    <string name="num_key_credits_item_2_desc">21</string>
+    <string name="num_key_about_app_desc">22</string>
+    <string name="num_key_action_website">23</string>
+    <string name="num_key_action_view_on_github">24</string>
+    <string name="num_key_action_contact">25</string>
+    <string name="num_key_category_videos">26</string>
+    <string name="num_key_category_utilities">27</string>
+    <string name="num_key_category_games">28</string>
+    <string name="num_key_category_music">29</string>
+    <string name="num_key_action_add_app">30</string>
+    <string name="num_key_action_download_update">31</string>
+    <string name="num_key_action_install_app">32</string>
+    <string name="num_key_credits_fossify">33</string>
+    <string name="num_key_credits_sameerasw">34</string>
+    <string name="num_key_credits_ivorisnoob">35</string>
+    <string name="num_key_credits_shrimqy">36</string>
+    <string name="num_key_developed_by_format">37</string>
 </resources>

@@ -72,6 +72,7 @@ import com.essential.services.ui.theme.MeDropTheme
 import com.essential.services.utils.ApkInstaller
 import com.essential.services.utils.AppColorManager
 import com.essential.services.utils.SettingsMenuManager
+import com.essential.services.utils.TranslationManager
 import com.essential.services.viewmodels.MeDropViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -127,6 +128,22 @@ class SettingsActivity : ComponentActivity() {
                     if (fresh != null) {
                         withContext(Dispatchers.Main) {
                             settingsMenuData = fresh
+                        }
+                        fresh.sections.forEach { section ->
+                            section.items.forEach { item ->
+                                if (item.type == "selector_card" && !item.items.isNullOrEmpty()) {
+                                    item.items.forEach { subItem ->
+                                        if (!subItem.translationsURLfetch.isNullOrBlank() && subItem.translationsURLfetch.startsWith("http", ignoreCase = true)) {
+                                            val code = when {
+                                                subItem.title.contains("English", ignoreCase = true) -> "en"
+                                                subItem.title.contains("Spanish", ignoreCase = true) || subItem.title.contains("Español", ignoreCase = true) -> "es"
+                                                else -> subItem.title.lowercase().take(2)
+                                            }
+                                            TranslationManager.fetchAndApplyLanguage(context, code, subItem.translationsURLfetch)
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -214,9 +231,10 @@ class SettingsActivity : ComponentActivity() {
                                 }
 
                                 if (visibleItems.isNotEmpty()) {
-                                    if (section.title.isNotBlank()) {
+                                    val sectionTitle = TranslationManager.getString(context, section.title, section.title)
+                                    if (sectionTitle.isNotBlank()) {
                                         Text(
-                                            text = section.title,
+                                            text = sectionTitle,
                                             style = MaterialTheme.typography.labelLarge,
                                             color = MaterialTheme.colorScheme.primary,
                                             modifier = Modifier.padding(start = 8.dp),
@@ -250,10 +268,13 @@ class SettingsActivity : ComponentActivity() {
                                                     else -> Pair(false) { _: Boolean -> }
                                                 }
 
+                                                val itemTitle = TranslationManager.getString(context, item.title, item.title)
+                                                val itemDesc = item.description?.let { TranslationManager.getString(context, it, it) }
+
                                                 IconToggleItem(
                                                     iconRes = iconRes,
-                                                    title = item.title,
-                                                    description = item.description,
+                                                    title = itemTitle,
+                                                    description = itemDesc,
                                                     isChecked = isChecked,
                                                     onCheckedChange = onToggle,
                                                 )
@@ -284,7 +305,7 @@ class SettingsActivity : ComponentActivity() {
                                                         modifier = Modifier.size(24.dp)
                                                     )
                                                     Text(
-                                                        text = item.title,
+                                                        text = TranslationManager.getString(context, item.title, item.title),
                                                         style = MaterialTheme.typography.titleMedium,
                                                         fontWeight = FontWeight.Bold,
                                                         color = MaterialTheme.colorScheme.onSurface
@@ -301,14 +322,17 @@ class SettingsActivity : ComponentActivity() {
                                                             Button(
                                                                 onClick = {
                                                                     com.essential.services.utils.HapticUtil.performVirtualKeyHaptic(view)
+                                                                    val langCode = when {
+                                                                        subItem.title.contains("English", ignoreCase = true) -> "en"
+                                                                        subItem.title.contains("Spanish", ignoreCase = true) || subItem.title.contains("Español", ignoreCase = true) -> "es"
+                                                                        else -> subItem.title.lowercase().take(2)
+                                                                    }
                                                                     val fetchUrl = subItem.translationsURLfetch ?: ""
-                                                                    if (fetchUrl.startsWith("http", ignoreCase = true)) {
-                                                                        android.widget.Toast.makeText(context, "Fetching language: ${subItem.title}", android.widget.Toast.LENGTH_SHORT).show()
-                                                                    } else if (subItem.action == "CHECK_UPDATE") {
-                                                                        val targetUrl = subItem.targetUrl ?: context.getString(R.string.setting_download_web_url)
-                                                                        ApkInstaller.downloadAndInstallApk(context, targetUrl)
-                                                                    } else {
-                                                                        android.widget.Toast.makeText(context, "Language: ${subItem.title}", android.widget.Toast.LENGTH_SHORT).show()
+                                                                    scope.launch(Dispatchers.IO) {
+                                                                        TranslationManager.fetchAndApplyLanguage(context, langCode, fetchUrl)
+                                                                        withContext(Dispatchers.Main) {
+                                                                            android.widget.Toast.makeText(context, "Language set to ${subItem.title}", android.widget.Toast.LENGTH_SHORT).show()
+                                                                        }
                                                                     }
                                                                 },
                                                                 colors = ButtonDefaults.buttonColors(
@@ -319,7 +343,7 @@ class SettingsActivity : ComponentActivity() {
                                                                 modifier = Modifier.weight(1f)
                                                             ) {
                                                                 Text(
-                                                                    text = subItem.title,
+                                                                    text = TranslationManager.getString(context, subItem.title, subItem.title),
                                                                     style = MaterialTheme.typography.bodyMedium,
                                                                     fontWeight = FontWeight.Medium
                                                                 )
@@ -337,8 +361,8 @@ class SettingsActivity : ComponentActivity() {
                                         val accentColor = containerColor.copy(alpha = 0.8f)
 
                                         FeatureCard(
-                                            title = item.title,
-                                            description = item.description,
+                                            title = TranslationManager.getString(context, item.title, item.title),
+                                            description = item.description?.let { TranslationManager.getString(context, it, it) },
                                             iconRes = iconRes,
                                             containerColor = containerColor,
                                             accentColor = accentColor,
@@ -389,13 +413,42 @@ class SettingsActivity : ComponentActivity() {
 
                                     visibleItems.filter { it.type == "credits" }.forEach { item ->
                                         RoundedCardContainer {
-                                            CreditsMarkdownUI(fileName = item.fileName ?: "credits.md")
+                                            if (!item.creditsList.isNullOrEmpty()) {
+                                                Column(
+                                                    modifier = Modifier.padding(16.dp),
+                                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                                ) {
+                                                    item.creditsList.forEach { credit ->
+                                                        Column {
+                                                            Text(
+                                                                text = TranslationManager.getString(context, credit.title, credit.title),
+                                                                style = MaterialTheme.typography.titleMedium,
+                                                                fontWeight = FontWeight.Bold,
+                                                                color = MaterialTheme.colorScheme.onSurface
+                                                            )
+                                                            if (!credit.description.isNullOrBlank()) {
+                                                                Text(
+                                                                    text = TranslationManager.getString(context, credit.description, credit.description),
+                                                                    style = MaterialTheme.typography.bodySmall,
+                                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            } else {
+                                                CreditsMarkdownUI(fileName = item.fileName ?: "credits.md")
+                                            }
                                         }
                                     }
 
-                                    visibleItems.filter { it.type == "about" }.forEach { _ ->
+                                    visibleItems.filter { it.type == "about" }.forEach { item ->
                                         RoundedCardContainer {
                                             AboutSection(
+                                                appName = item.appName ?: stringResource(R.string.app_name),
+                                                developerName = item.developer ?: stringResource(R.string.app_developer_name),
+                                                description = item.description ?: stringResource(R.string.app_description),
+                                                links = item.links,
                                                 onAvatarLongClick = {
                                                     val newState = !isDeveloperModeEnabled
                                                     viewModel.setDeveloperModeEnabled(context, newState)
@@ -442,12 +495,12 @@ class SettingsActivity : ComponentActivity() {
                         var showHelpSheet by remember { mutableStateOf(false) }
 
                         MeDropFloatingToolbar(
-                            title = settingsMenuData.title.ifBlank { stringResource(R.string.settings_title) },
+                            title = TranslationManager.getString(context, settingsMenuData.title, settingsMenuData.title).ifBlank { stringResource(R.string.settings_title) },
                             onBackClick = { goBackToContact() },
                             onHelpClick = { showHelpSheet = true },
                             modifier =
                                 Modifier
-                                    .align(androidx.compose.ui.Alignment.BottomCenter)
+                                    .align(Alignment.BottomCenter)
                                     .zIndex(1f),
                         )
 

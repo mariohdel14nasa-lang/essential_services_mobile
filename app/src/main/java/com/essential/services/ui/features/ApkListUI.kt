@@ -63,6 +63,7 @@ import com.essential.services.data.model.AppItem
 import com.essential.services.data.repository.AppRepository
 import com.essential.services.utils.ApkInstaller
 import com.essential.services.utils.HapticUtil
+import com.essential.services.utils.TranslationManager
 
 fun Drawable.toImageBitmap(): ImageBitmap {
     if (this is BitmapDrawable && bitmap != null) {
@@ -208,14 +209,15 @@ fun ApkListUI(
                     Spacer(modifier = Modifier.width(12.dp))
 
                     Column {
+                        val categoryTitle = TranslationManager.getString(context, selectedCategory.id, stringResource(selectedCategory.titleRes))
                         Text(
-                            text = stringResource(selectedCategory.titleRes),
+                            text = categoryTitle,
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
-                            text = "${categoryApps.size} apps disponibles",
+                            text = "${categoryApps.size} apps",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -236,16 +238,12 @@ fun ApkListUI(
                         modifier = Modifier.padding(20.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
+                        val categoryTitle = TranslationManager.getString(context, selectedCategory.id, stringResource(selectedCategory.titleRes))
                         Text(
-                            text = "No hay apps en ${stringResource(selectedCategory.titleRes)}",
+                            text = "$categoryTitle",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
-                        )
-                        Text(
-                            text = "Pulsa el botón '+' en la barra flotante de categorías abajo para añadir tu primera app a esta categoría.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -348,7 +346,7 @@ fun ApkListUI(
                                                 modifier = Modifier.size(18.dp),
                                             )
                                             Spacer(modifier = Modifier.width(6.dp))
-                                            Text(text = stringResource(R.string.action_download_update))
+                                            Text(text = TranslationManager.getString(context, "31", stringResource(R.string.action_download_update)))
                                         }
                                     } else if (app.apkFile != null) {
                                         Button(
@@ -362,7 +360,7 @@ fun ApkListUI(
                                             ),
                                             shape = RoundedCornerShape(12.dp),
                                         ) {
-                                            Text(text = stringResource(R.string.action_install_app))
+                                            Text(text = TranslationManager.getString(context, "32", stringResource(R.string.action_install_app)))
                                         }
                                     }
 

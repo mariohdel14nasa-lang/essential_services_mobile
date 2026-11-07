@@ -43,6 +43,12 @@ class MeDropRepository(context: Context) {
         prefs.edit().putString(KEY_WEBVIEW_LOCALSTORAGE, dataJson).apply()
     }
 
+    fun isFirstLaunchCompleted(): Boolean = prefs.getBoolean(KEY_FIRST_LAUNCH_COMPLETED, false)
+
+    fun setFirstLaunchCompleted(completed: Boolean = true) {
+        prefs.edit().putBoolean(KEY_FIRST_LAUNCH_COMPLETED, completed).apply()
+    }
+
     companion object {
         private const val PREFS_NAME = "medrop_preferences"
         const val KEY_MEDROP_SETTINGS_JSON = "medrop_settings_json"
@@ -51,5 +57,6 @@ class MeDropRepository(context: Context) {
         const val KEY_BLUR_ENABLED = "blur_enabled"
         const val KEY_DEVELOPER_MODE_ENABLED = "developer_mode_enabled"
         const val KEY_WEBVIEW_LOCALSTORAGE = "webview_localstorage_data"
+        const val KEY_FIRST_LAUNCH_COMPLETED = "first_launch_completed"
     }
 }

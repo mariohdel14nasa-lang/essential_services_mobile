@@ -10,6 +10,17 @@ import kotlinx.coroutines.withContext
 import javax.net.ssl.HttpsURLConnection
 import java.net.URL
 
+data class CreditItemData(
+    val title: String = "",
+    val description: String? = null,
+)
+
+data class AboutLinkData(
+    val title: String = "",
+    val url: String = "",
+    val icon: String? = null,
+)
+
 data class SettingsMenuItem(
     val id: String = "",
     val type: String = "toggle",
@@ -23,6 +34,11 @@ data class SettingsMenuItem(
     val fileName: String? = null,
     val items: List<SettingsMenuItem>? = null,
     val translationsURLfetch: String? = null,
+    val creditsList: List<CreditItemData>? = null,
+    val appName: String? = null,
+    val version: String? = null,
+    val developer: String? = null,
+    val links: List<AboutLinkData>? = null,
 )
 
 data class SettingsMenuSection(
@@ -32,8 +48,8 @@ data class SettingsMenuSection(
 )
 
 data class SettingsMenuData(
-    val appVersion: String = "",
-    val version: String = "1.0",
+    val appVersion: String = "1.4",
+    val version: String = "1.4",
     val title: String = "Ajustes",
     val sections: List<SettingsMenuSection> = emptyList(),
 )
@@ -52,45 +68,18 @@ object SettingsMenuManager {
       "versions": [
         {
           "appVersion": "1.4",
-          "title": "Ajustes v1.4",
+          "title": "Ajustes",
           "sections": [
             {
-              "id": "language_section",
-              "title": "Idioma",
-              "items": [
-                {
-                  "id": "language_button",
-                  "type": "selector_card",
-                  "icon": "rounded_blur_on_24",
-                  "title": "Language",
-                  "colorKey": "green",
-                  "items": [
-                    {
-                      "title": "English",
-                      "colorKey": "green",
-                      "action": "SET_LANGUAGE",
-                      "translationsURLfetch": "to be added"
-                    },
-                    {
-                      "title": "Spanish",
-                      "colorKey": "green",
-                      "action": "SET_LANGUAGE",
-                      "translationsURLfetch": "to be added"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
               "id": "profiles_section",
-              "title": "Más perfiles",
+              "title": "More Sections",
               "items": [
                 {
                   "id": "custom_profile_toggle",
                   "type": "toggle",
                   "icon": "ic_apps_24",
                   "title": "Apps",
-                  "description": "Todas las Apps Esenciales",
+                  "description": "All Essential Apps",
                   "action": "TOGGLE_CUSTOM_PROFILE"
                 }
               ]
@@ -103,25 +92,17 @@ object SettingsMenuManager {
                   "id": "deeplink_sharing_toggle",
                   "type": "toggle",
                   "icon": "rounded_globe_24",
-                  "title": "Compartir Datos de Cuenta Essential con otras apps",
-                  "description": "Permitir que otras aplicaciones accedan a tus datos de cuenta Essential vía URIs y Deep Links",
+                  "title": "Share Essential Account Settings",
+                  "description": "Allow Other Apps to access Essential Account data via URIs and Deep Links",
                   "action": "TOGGLE_DEEPLINK_SHARING"
                 },
                 {
                   "id": "allow_locked_toggle",
                   "type": "toggle",
                   "icon": "rounded_lock_24",
-                  "title": "Permitir cuando está bloqueado",
-                  "description": "Abrir Essential Services desde el tile rápido incluso cuando la pantalla está bloqueada",
+                  "title": "Allow When locked",
+                  "description": "",
                   "action": "TOGGLE_ALLOW_WHEN_LOCKED"
-                },
-                {
-                  "id": "show_ripple_toggle",
-                  "type": "toggle",
-                  "icon": "rounded_blur_on_24",
-                  "title": "Mostrar efecto onda",
-                  "action": "TOGGLE_SHOW_RIPPLE",
-                  "minSdk": 33
                 }
               ]
             },
@@ -137,34 +118,47 @@ object SettingsMenuManager {
                   "colorKey": "green",
                   "action": "CHECK_UPDATE",
                   "targetUrl": "https://github.com/mariohdel14nasa-lang/essential_services_mobile/releases/latest/download/essentialservices.apk"
+                },
+                {
+                  "id": "language_button",
+                  "type": "selector_card",
+                  "icon": "rounded_blur_on_24",
+                  "title": "Language",
+                  "colorKey": "green",
+                  "items": [
+                    {
+                      "title": "English",
+                      "colorKey": "green",
+                      "action": "CHECK_UPDATE",
+                      "translationsURLfetch": "to be added"
+                    },
+                    {
+                      "title": "Update",
+                      "colorKey": "green",
+                      "action": "CHECK_UPDATE",
+                      "translationsURLfetch": "to be added"
+                    }
+                  ]
                 }
               ]
             },
             {
               "id": "appearance_section",
-              "title": "Apariencia",
+              "title": "Appearence",
               "items": [
                 {
                   "id": "pitch_black_toggle",
                   "type": "toggle",
                   "icon": "rounded_palette_24",
-                  "title": "Tema negro puro",
-                  "description": "Usar fondo negro puro en modo oscuro",
+                  "title": "Pitch Black Mode",
+                  "description": "Use Pitch Black mode on Dark Mode",
                   "action": "TOGGLE_PITCH_BLACK"
-                },
-                {
-                  "id": "use_blur_toggle",
-                  "type": "toggle",
-                  "icon": "rounded_blur_on_24",
-                  "title": "Usar desenfoque",
-                  "description": "Habilitar elementos de desenfoque progresivo en la UI",
-                  "action": "TOGGLE_USE_BLUR"
                 }
               ]
             },
             {
               "id": "credits_section",
-              "title": "Créditos a...",
+              "title": "Credits To...",
               "items": [
                 {
                   "id": "credits_markdown",
@@ -175,7 +169,7 @@ object SettingsMenuManager {
             },
             {
               "id": "about_section",
-              "title": "Acerca de",
+              "title": "About",
               "items": [
                 {
                   "id": "about_app_info",
@@ -193,7 +187,7 @@ object SettingsMenuManager {
         return try {
             context.getString(R.string.settings_menu_version)
         } catch (_: Exception) {
-            "1.0"
+            "1.4"
         }
     }
 
@@ -231,15 +225,27 @@ object SettingsMenuManager {
         }
     }
 
+    fun sanitizeJsonString(rawJson: String): String {
+        var clean = rawJson.trim()
+        // Fix missing opening brace before "id": if preceded by comma or [
+        clean = clean.replace(Regex(",\\s*\"id\"\\s*:"), ", {\"id\":")
+        clean = clean.replace(Regex("\\[\\s*\"id\"\\s*:"), "[ {\"id\":")
+
+        // Fix trailing commas before ] or }
+        clean = clean.replace(Regex(",\\s*([\\]}])"), "$1")
+
+        return clean
+    }
+
     fun parseSettingsJsonForVersion(jsonStr: String, targetVersion: String): SettingsMenuData {
         try {
             val gson = Gson()
-            val trimmed = jsonStr.trim()
+            val sanitized = sanitizeJsonString(jsonStr)
 
-            // 1. Try object containing "versions": [ { "appVersion": "1.0", ... }, ... ]
-            if (trimmed.startsWith("{")) {
-                val container = gson.fromJson(trimmed, MultiVersionSettingsContainer::class.java)
-                if (container != null && !container.versions.isNullOrEmpty()) {
+            // 1. Try object containing "versions": [ { "appVersion": "1.4", ... }, ... ]
+            if (sanitized.startsWith("{")) {
+                val container = gson.fromJson(sanitized, MultiVersionSettingsContainer::class.java)
+                if (container != null && container.versions.isNotEmpty()) {
                     val matched = container.versions.find {
                         it.appVersion.equals(targetVersion, ignoreCase = true) || it.version.equals(targetVersion, ignoreCase = true)
                     } ?: container.versions.first()
@@ -247,10 +253,10 @@ object SettingsMenuManager {
                 }
             }
 
-            // 2. Try array [ { "appVersion": "1.0", ... }, ... ]
-            if (trimmed.startsWith("[")) {
+            // 2. Try array [ { "appVersion": "1.4", ... }, ... ]
+            if (sanitized.startsWith("[")) {
                 val type = object : TypeToken<List<SettingsMenuData>>() {}.type
-                val list: List<SettingsMenuData>? = gson.fromJson(trimmed, type)
+                val list: List<SettingsMenuData>? = gson.fromJson(sanitized, type)
                 if (!list.isNullOrEmpty()) {
                     val matched = list.find {
                         it.appVersion.equals(targetVersion, ignoreCase = true) || it.version.equals(targetVersion, ignoreCase = true)
@@ -260,8 +266,8 @@ object SettingsMenuManager {
             }
 
             // 3. Try direct single object
-            val single = gson.fromJson(trimmed, SettingsMenuData::class.java)
-            if (single != null && !single.sections.isNullOrEmpty()) {
+            val single = gson.fromJson(sanitized, SettingsMenuData::class.java)
+            if (single != null && single.sections.isNotEmpty()) {
                 return single
             }
         } catch (e: Exception) {
@@ -271,7 +277,7 @@ object SettingsMenuManager {
         // Fallback to default
         return try {
             val gson = Gson()
-            val container = gson.fromJson(DEFAULT_FALLBACK_JSON, MultiVersionSettingsContainer::class.java)
+            val container = gson.fromJson(sanitizeJsonString(DEFAULT_FALLBACK_JSON), MultiVersionSettingsContainer::class.java)
             container.versions.first()
         } catch (_: Exception) {
             SettingsMenuData()

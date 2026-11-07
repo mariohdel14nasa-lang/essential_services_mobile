@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -40,6 +41,7 @@ import com.essential.services.R
 import com.essential.services.data.model.AppCategory
 import com.essential.services.ui.core.containers.RoundedCardContainer
 import com.essential.services.utils.HapticUtil
+import com.essential.services.utils.TranslationManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,6 +60,8 @@ fun AddAppBottomSheet(
 
     var isError by remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
+
     MeDropBottomSheetContainer(
         onDismissRequest = onDismissRequest,
     ) {
@@ -70,7 +74,7 @@ fun AddAppBottomSheet(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                text = stringResource(R.string.dialog_add_app_title),
+                text = TranslationManager.getString(context, R.string.dialog_add_app_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -87,7 +91,7 @@ fun AddAppBottomSheet(
                             appName = it
                             isError = false
                         },
-                        label = { Text(stringResource(R.string.dialog_app_name)) },
+                        label = { Text(TranslationManager.getString(context, R.string.dialog_app_name)) },
                         isError = isError && appName.isBlank(),
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
@@ -100,7 +104,7 @@ fun AddAppBottomSheet(
                             downloadUrl = it
                             isError = false
                         },
-                        label = { Text(stringResource(R.string.dialog_app_url)) },
+                        label = { Text(TranslationManager.getString(context, R.string.dialog_app_url)) },
                         placeholder = { Text("https://ejemplo.com/app.apk") },
                         isError = isError && downloadUrl.isBlank(),
                         singleLine = true,
@@ -111,7 +115,7 @@ fun AddAppBottomSheet(
                     OutlinedTextField(
                         value = iconUrl,
                         onValueChange = { iconUrl = it },
-                        label = { Text(stringResource(R.string.dialog_app_icon)) },
+                        label = { Text(TranslationManager.getString(context, R.string.dialog_app_icon)) },
                         placeholder = { Text("https://ejemplo.com/foto.png") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
@@ -121,7 +125,7 @@ fun AddAppBottomSheet(
                     OutlinedTextField(
                         value = description,
                         onValueChange = { description = it },
-                        label = { Text(stringResource(R.string.dialog_app_description)) },
+                        label = { Text(TranslationManager.getString(context, R.string.dialog_app_description)) },
                         singleLine = false,
                         maxLines = 3,
                         modifier = Modifier.fillMaxWidth(),
@@ -131,7 +135,7 @@ fun AddAppBottomSheet(
             }
 
             Text(
-                text = stringResource(R.string.dialog_app_category),
+                text = TranslationManager.getString(context, R.string.dialog_app_category),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
@@ -166,7 +170,7 @@ fun AddAppBottomSheet(
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
-                                text = stringResource(cat.titleRes),
+                                text = TranslationManager.getString(context, cat.id, stringResource(cat.titleRes)),
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                 color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,

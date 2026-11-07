@@ -100,6 +100,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val meDropRepo = MeDropRepository(this)
+        if (!meDropRepo.isFirstLaunchCompleted()) {
+            val onboardingIntent = Intent(this, com.essential.services.ui.activities.OnboardingActivity::class.java)
+            startActivity(onboardingIntent)
+            finish()
+            return
+        }
         currentIntentState.value = intent
         enableEdgeToEdge(
             statusBarStyle =

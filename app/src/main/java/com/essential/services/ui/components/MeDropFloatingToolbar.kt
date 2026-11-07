@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
@@ -312,7 +313,7 @@ fun MeDropFloatingToolbar(
                                 if (isSelected && !shouldHideLabel) {
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = stringResource(id = item.labelRes),
+                                        text = com.essential.services.utils.TranslationManager.getString(LocalContext.current, item.labelRes),
                                         style = MaterialTheme.typography.labelLarge,
                                         maxLines = 1,
                                         color = MaterialTheme.colorScheme.primary,
