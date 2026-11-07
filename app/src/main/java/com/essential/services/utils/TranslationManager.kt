@@ -303,3 +303,22 @@ object TranslationManager {
         }
     }
 }
+
+@Suppress("QueryLocalContext", "DiscouragedApi", "QueryContext")
+@Composable
+fun stringResource(resId: Int): String {
+    val context = LocalContext.current
+    return TranslationManager.getString(context, resId)
+}
+
+@Suppress("QueryLocalContext", "DiscouragedApi")
+@Composable
+fun stringResource(resId: Int, vararg formatArgs: Any): String {
+    val context = LocalContext.current
+    val raw = TranslationManager.getString(context, resId)
+    return try {
+        String.format(raw, *formatArgs)
+    } catch (_: Exception) {
+        raw
+    }
+}
