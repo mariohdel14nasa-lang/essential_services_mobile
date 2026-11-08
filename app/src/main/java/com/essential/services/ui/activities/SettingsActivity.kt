@@ -37,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -119,6 +120,7 @@ class SettingsActivity : ComponentActivity() {
                 goBackToContact()
             }
 
+            val langVer = TranslationManager.translationVersionState.value
             val scope = rememberCoroutineScope()
             var settingsMenuData by remember { mutableStateOf(SettingsMenuManager.getCachedSettingsMenu(context)) }
 
@@ -132,16 +134,7 @@ class SettingsActivity : ComponentActivity() {
                         fresh.sections.forEach { section ->
                             section.items.forEach { item ->
                                 if (item.type == "selector_card" && !item.items.isNullOrEmpty()) {
-                                    item.items.forEach { subItem ->
-                                        if (!subItem.translationsURLfetch.isNullOrBlank() && subItem.translationsURLfetch.startsWith("http", ignoreCase = true)) {
-                                            val code = when {
-                                                subItem.title.contains("English", ignoreCase = true) -> "en"
-                                                subItem.title.contains("Spanish", ignoreCase = true) || subItem.title.contains("Español", ignoreCase = true) -> "es"
-                                                else -> subItem.title.lowercase().take(2)
-                                            }
-                                            TranslationManager.fetchAndApplyLanguage(context, code, subItem.translationsURLfetch)
-                                        }
-                                    }
+                                    TranslationManager.prefetchAndCacheAllLanguages(context, item.items)
                                 }
                             }
                         }
@@ -177,14 +170,15 @@ class SettingsActivity : ComponentActivity() {
             val safeSettings = settings ?: MeDropSettings()
             val density = LocalDensity.current
 
-            MeDropTheme(
-                pitchBlackTheme = isPitchBlackThemeEnabled,
-                remoteColors = viewModel.remoteColors.value,
-            ) {
-                Scaffold(
-                    contentWindowInsets = WindowInsets(0, 0, 0, 0),
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                ) { innerPadding ->
+            key(langVer) {
+                MeDropTheme(
+                    pitchBlackTheme = isPitchBlackThemeEnabled,
+                    remoteColors = viewModel.remoteColors.value,
+                ) {
+                    Scaffold(
+                        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    ) { innerPadding ->
                     val statusBarHeightPx =
                         with(density) {
                             WindowInsets.statusBars
@@ -322,12 +316,8 @@ class SettingsActivity : ComponentActivity() {
                                                             Button(
                                                                 onClick = {
                                                                     com.essential.services.utils.HapticUtil.performVirtualKeyHaptic(view)
-                                                                    val langCode = when {
-                                                                        subItem.title.contains("English", ignoreCase = true) -> "en"
-                                                                        subItem.title.contains("Spanish", ignoreCase = true) || subItem.title.contains("Español", ignoreCase = true) -> "es"
-                                                                        else -> subItem.title.lowercase().take(2)
-                                                                    }
                                                                     val fetchUrl = subItem.translationsURLfetch ?: ""
+                                                                    val langCode = TranslationManager.extractLangCodeFromItem(subItem)
                                                                     scope.launch(Dispatchers.IO) {
                                                                         TranslationManager.fetchAndApplyLanguage(context, langCode, fetchUrl)
                                                                         withContext(Dispatchers.Main) {
@@ -514,4 +504,5 @@ class SettingsActivity : ComponentActivity() {
             }
         }
     }
+}
 }

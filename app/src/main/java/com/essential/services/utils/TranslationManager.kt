@@ -8,6 +8,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 import javax.net.ssl.HttpsURLConnection
 import java.net.URL
 
@@ -20,7 +21,6 @@ data class RemoteTranslationData(
 object TranslationManager {
     private const val PREFS_NAME = "translation_prefs"
     private const val KEY_CURRENT_LANG = "current_language_code"
-    private const val KEY_ACTIVE_TRANSLATION_MAP = "active_translation_map_json"
     private const val PREFIX_CACHED_LANG = "cached_lang_"
 
     val translationVersionState = mutableStateOf(0)
@@ -104,8 +104,25 @@ object TranslationManager {
         "34" to "Creator of Draft and app base",
         "35" to "Creator of Koda",
         "36" to "Creator of Sefirah",
-        "37" to "Developed by mariohdel14nasa-lang with ❤\uFE0F from 🇪🇸",
+        "37" to "Developed by mariohdel14nasa-lang with ❤\uFE0F desde 🇪🇸",
     )
+
+    fun extractLangCodeFromItem(subItem: SettingsMenuItem): String {
+        val fetchUrl = subItem.translationsURLfetch ?: ""
+        val match = Regex("""translations([a-z]{2,5})\.json""", RegexOption.IGNORE_CASE).find(fetchUrl)
+        if (match != null) {
+            return match.groupValues[1].lowercase()
+        }
+        val codeMatch = Regex("""/([a-z]{2,5})\.json""", RegexOption.IGNORE_CASE).find(fetchUrl)
+        if (codeMatch != null) {
+            return codeMatch.groupValues[1].lowercase()
+        }
+        return when {
+            subItem.title.contains("English", ignoreCase = true) || subItem.title.contains("Inglés", ignoreCase = true) -> "en"
+            subItem.title.contains("Spanish", ignoreCase = true) || subItem.title.contains("Español", ignoreCase = true) -> "es"
+            else -> subItem.title.lowercase().filter { it.isLetter() }.take(2).ifBlank { "es" }
+        }
+    }
 
     fun getCurrentLanguage(context: Context): String {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -124,6 +141,7 @@ object TranslationManager {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val currentLang = getCurrentLanguage(context)
 
+        // 1. Load cached map specifically for the current language
         val cachedJson = prefs.getString(PREFIX_CACHED_LANG + currentLang, null)
         if (!cachedJson.isNullOrBlank()) {
             try {
@@ -133,25 +151,64 @@ object TranslationManager {
             } catch (_: Exception) {}
         }
 
-        val activeJson = prefs.getString(KEY_ACTIVE_TRANSLATION_MAP, null)
-        if (!activeJson.isNullOrBlank()) {
-            try {
-                val type = object : TypeToken<Map<String, String>>() {}.type
-                val map: Map<String, String>? = gson.fromJson(activeJson, type)
-                if (!map.isNullOrEmpty()) return map
-            } catch (_: Exception) {}
-        }
-
+        // 2. Fallback strictly to local appdata for currentLang (never cross-language)
         return when (currentLang.lowercase()) {
             "en" -> LOCAL_ENGLISH_NUMERICAL_TRANSLATIONS
             else -> LOCAL_SPANISH_NUMERICAL_TRANSLATIONS
         }
     }
 
+    suspend fun prefetchAndCacheAllLanguages(context: Context, languageItems: List<SettingsMenuItem>) {
+        withContext(Dispatchers.IO) {
+            languageItems.forEach { subItem ->
+                val fetchUrl = subItem.translationsURLfetch
+                if (!fetchUrl.isNullOrBlank() && fetchUrl.startsWith("http", ignoreCase = true)) {
+                    try {
+                        val url = URL(fetchUrl)
+                        val connection = url.openConnection() as HttpsURLConnection
+                        connection.requestMethod = "GET"
+                        connection.connectTimeout = 5000
+                        connection.readTimeout = 5000
+                        if (connection.responseCode == HttpsURLConnection.HTTP_OK) {
+                            val jsonString = connection.inputStream.bufferedReader().use { it.readText() }
+                            if (jsonString.isNotBlank()) {
+                                var langCode = ""
+                                var mapToSave: Map<String, String> = emptyMap()
+
+                                val type = object : TypeToken<Map<String, Any>>() {}.type
+                                val objMap: Map<String, Any>? = gson.fromJson(jsonString, type)
+                                if (objMap != null) {
+                                    langCode = (objMap["langCode"] as? String)?.trim() ?: extractLangCodeFromItem(subItem)
+                                    val transObj = objMap["translations"] ?: objMap
+                                    val transJson = gson.toJson(transObj)
+                                    val mapType = object : TypeToken<Map<String, String>>() {}.type
+                                    val parsed: Map<String, String>? = gson.fromJson(transJson, mapType)
+                                    if (parsed != null) mapToSave = parsed
+                                }
+
+                                if (mapToSave.isNotEmpty() && langCode.isNotBlank()) {
+                                    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                                    val jsonMapStr = gson.toJson(mapToSave)
+                                    prefs.edit()
+                                        .putString(PREFIX_CACHED_LANG + langCode.lowercase(), jsonMapStr)
+                                        .apply()
+
+                                    try {
+                                        generateOnlineTranslationsXml(context, mapToSave)
+                                    } catch (_: Exception) {}
+                                }
+                            }
+                        }
+                    } catch (_: Exception) {}
+                }
+            }
+        }
+    }
+
     suspend fun fetchAndApplyLanguage(context: Context, langCode: String, fetchUrl: String?): Boolean {
-        setCurrentLanguage(context, langCode)
         if (fetchUrl.isNullOrBlank() || !fetchUrl.startsWith("http", ignoreCase = true)) {
-            return false
+            setCurrentLanguage(context, langCode)
+            return true
         }
 
         return withContext(Dispatchers.IO) {
@@ -167,20 +224,21 @@ object TranslationManager {
                     val jsonString = connection.inputStream.bufferedReader().use { it.readText() }
                     if (jsonString.isNotBlank()) {
                         var mapToSave: Map<String, String> = emptyMap()
+                        var finalLangCode = langCode
 
                         if (jsonString.trim().startsWith("{")) {
                             try {
                                 val type = object : TypeToken<Map<String, Any>>() {}.type
                                 val objMap: Map<String, Any>? = gson.fromJson(jsonString, type)
-                                val transObj = objMap?.get("translations")
+                                val payloadCode = objMap?.get("langCode") as? String
+                                if (!payloadCode.isNullOrBlank()) {
+                                    finalLangCode = payloadCode.lowercase()
+                                }
+                                val transObj = objMap?.get("translations") ?: objMap
                                 if (transObj != null) {
                                     val transJson = gson.toJson(transObj)
                                     val mapType = object : TypeToken<Map<String, String>>() {}.type
                                     val parsed: Map<String, String>? = gson.fromJson(transJson, mapType)
-                                    if (parsed != null) mapToSave = parsed
-                                } else {
-                                    val mapType = object : TypeToken<Map<String, String>>() {}.type
-                                    val parsed: Map<String, String>? = gson.fromJson(jsonString, type)
                                     if (parsed != null) mapToSave = parsed
                                 }
                             } catch (_: Exception) {}
@@ -190,9 +248,14 @@ object TranslationManager {
                             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                             val jsonMapStr = gson.toJson(mapToSave)
                             prefs.edit()
-                                .putString(KEY_ACTIVE_TRANSLATION_MAP, jsonMapStr)
-                                .putString(PREFIX_CACHED_LANG + langCode, jsonMapStr)
+                                .putString(PREFIX_CACHED_LANG + finalLangCode.lowercase(), jsonMapStr)
                                 .apply()
+
+                            setCurrentLanguage(context, finalLangCode)
+
+                            try {
+                                generateOnlineTranslationsXml(context, mapToSave)
+                            } catch (_: Exception) {}
 
                             withContext(Dispatchers.Main) {
                                 translationVersionState.value++
@@ -234,7 +297,7 @@ object TranslationManager {
         // 4. Trimmed lookup
         map[keyOrNum.trim()]?.let { if (it.isNotBlank() && !it.all { c -> c.isDigit() }) return it }
 
-        return if (fallback.isNotBlank() && !fallback.all { c -> c.isDigit() }) fallback else keyOrNum
+        return if (fallback.isNotBlank() && !fallback.all { it.isDigit() }) fallback else keyOrNum
     }
 
     fun getString(context: Context, resId: Int): String {
@@ -251,10 +314,18 @@ object TranslationManager {
         }
     }
 
-    @Composable
-    fun stringResource(resId: Int): String {
-        val context = LocalContext.current
-        return getString(context, resId)
+    fun generateOnlineTranslationsXml(context: Context, map: Map<String, String>): File {
+        val xmlDir = File(context.filesDir, "xml").apply { mkdirs() }
+        val xmlFile = File(xmlDir, "onlinetranslationsstrings.xml")
+        val sb = StringBuilder()
+        sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<resources>\n")
+        map.forEach { (k, v) ->
+            val escapedValue = v.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&apos;")
+            sb.append("    <string name=\"trans_$k\">$escapedValue</string>\n")
+        }
+        sb.append("</resources>\n")
+        xmlFile.writeText(sb.toString())
+        return xmlFile
     }
 
     private fun resolveNumericalIdFromResources(context: Context, keyStr: String): String? {
@@ -304,7 +375,7 @@ object TranslationManager {
     }
 }
 
-@Suppress("QueryLocalContext", "DiscouragedApi", "QueryContext")
+@Suppress("QueryLocalContext", "DiscouragedApi")
 @Composable
 fun stringResource(resId: Int): String {
     val context = LocalContext.current

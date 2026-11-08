@@ -140,6 +140,7 @@ fun SetupScreen(
                         withContext(Dispatchers.Main) {
                             languageOptions = item.items
                         }
+                        TranslationManager.prefetchAndCacheAllLanguages(context, item.items)
                     }
                 }
             }
@@ -197,11 +198,7 @@ fun SetupScreen(
                     ) {
                         if (languageOptions.isNotEmpty()) {
                             languageOptions.forEach { langItem ->
-                                val code = when {
-                                    langItem.title.contains("English", ignoreCase = true) -> "en"
-                                    langItem.title.contains("Spanish", ignoreCase = true) || langItem.title.contains("Español", ignoreCase = true) -> "es"
-                                    else -> langItem.title.lowercase().take(2)
-                                }
+                                val code = TranslationManager.extractLangCodeFromItem(langItem)
                                 val isSelected = activeLang.equals(code, ignoreCase = true)
 
                                 Box(

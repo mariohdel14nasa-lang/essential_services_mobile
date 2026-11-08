@@ -18,7 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import com.essential.services.utils.stringResource
 import androidx.compose.ui.unit.dp
 import com.essential.services.R
 import com.essential.services.data.model.AppCategory
@@ -75,7 +75,7 @@ fun MeDropCategoryFloatingToolbar(
                     ) {
                         Icon(
                             painter = painterResource(id = cat.iconRes),
-                            contentDescription = stringResource(id = cat.titleRes),
+                            contentDescription = stringResource(cat.titleRes),
                             modifier = Modifier.size(22.dp),
                         )
                     }

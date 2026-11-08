@@ -42,7 +42,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import com.essential.services.utils.stringResource
 import androidx.compose.ui.unit.dp
 import com.essential.services.R
 import com.essential.services.utils.HapticUtil
@@ -288,7 +288,7 @@ fun MeDropFloatingToolbar(
                                 Box {
                                     Icon(
                                         painter = painterResource(id = item.iconRes),
-                                        contentDescription = stringResource(id = item.labelRes),
+                                        contentDescription = stringResource(item.labelRes),
                                         tint =
                                             if (isSelected) {
                                                 MaterialTheme.colorScheme.primary
